@@ -1,9 +1,9 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../constants/header-logo.png";
-import InputDocuments from "../components/documents/InputDocuments";
-import DocumentsButtons from "../components/documents/DocumentsButtons";
-import OutputDocuments from "../components/documents/OutputDocuments";
+import InputDocuments from "../components/pdfPage/InputDocuments";
+import DocumentsButtons from "../components/pdfPage/DocumentsButtons";
+import OutputDocuments from "../components/pdfPage/OutputDocuments";
 import "./DocumentsPage.css";
 import TopNavigation from "../components/TopNavigation";
 

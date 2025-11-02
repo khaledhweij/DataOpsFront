@@ -12,7 +12,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
         className="modal-box"
         onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
       >
-        <h2>EdiDataBox</h2>
+        <h2>DataOps</h2>
         <p>
           Your all-in-one internal tool for working with JSON, XML, EDI, Base64
           and PDF documents securely — without exposing sensitive company data.

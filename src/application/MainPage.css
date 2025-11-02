@@ -1,0 +1,22 @@
+.main-page .button-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.main-page .button-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.action-bar {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .main-page .button-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

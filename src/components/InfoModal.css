@@ -17,13 +17,13 @@
 
 /* Center popup */
 .modal-box {
-  background: var(--card-bg, #ffffff);
+  background: var(--bg-card);
   padding: 25px 35px;
   border-radius: 10px;
   width: 400px;
   max-width: 80%;
   text-align: center;
-  border: 1px solid var(--border-color, #444);
+  border: 1px solid var(--border-color);
 
   animation: fadeIn 0.25s ease-out;
 }
@@ -36,7 +36,7 @@
   cursor: pointer;
   font-size: 14px;
   border-radius: 4px;
-  background: var(--accent-color, #6c5ce7);
+  background: #6c5ce7;
   color: #fff;
   transition: 0.2s;
 }
