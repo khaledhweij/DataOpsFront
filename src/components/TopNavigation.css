@@ -1,0 +1,55 @@
+.tabs-wrapper {
+    display: flex;
+    background: var(--card-bg, #ffffff);
+    border-bottom: 1px solid #cccaca;
+    margin-bottom: 30px;
+    margin-top: -10px;
+}
+
+.tab-btn {
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background: #eceaea;
+    color: var(--text-color, #000000);
+    padding: 15px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    border-bottom: 1px solid transparent;
+    margin-bottom: -1px;
+}
+
+.tab-btn.active {
+    border-radius: 8px 8px 0 0;
+    border-left: 1px solid #cccaca;
+    border-right: 1px solid #cccaca;
+    border-top: 1px solid #cccaca;
+    border-bottom: 1px solid transparent;
+    background: var(--card-bg, #fff);
+    font-weight: 600;
+    margin-bottom: -1px;
+}
+
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-bottom: auto;
+    margin-right: 50px;    
+}
+
+.about-mode-button {
+    width: 0px;
+    font-size: 15px;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--text-color, #0906c0);
+    margin-bottom: -1px;
+}
+
+.about-mode-button:hover {
+    transform: scale(1.15);
+}

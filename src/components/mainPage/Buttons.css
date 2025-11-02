@@ -1,0 +1,34 @@
+.button-group {
+  display:flexbox;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  width: 200px;
+  margin: 20px;
+  font-size: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.compare-button {
+  background-color: #31618d; 
+  color: white;
+}
+
+.compare-button:hover {
+  background-color: #0d3f81; 
+}
+
+.clear-button {
+  background-color: #31618d; 
+  color: white;
+}
+
+.clear-button:hover {
+  background-color: #f07d7b; 
+}

@@ -1,0 +1,35 @@
+.output-result-container {
+  flex: 1; 
+  margin-right: 10px; 
+  margin-left: 10px; 
+
+}
+
+.output-result-text {
+
+  flex: 1; 
+  font-family: 'Courier New', Courier, monospace;
+  font-size: large;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  border-color: rgb(160, 158, 158);
+  padding: 10px;
+  background-color: #f7f4f4;
+  margin-right: 20px; 
+  margin-left: 20px; 
+}
+
+.output-result {
+  width: 95%; 
+  max-height: 300px; 
+  min-height: 300px; 
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  border-color: rgb(160, 158, 158);
+  font-size: 16px;
+  resize: vertical;
+  overflow-y: auto; 
+  transition: border 1s;
+}

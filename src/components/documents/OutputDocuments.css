@@ -1,0 +1,38 @@
+.documents-display-box {
+  flex: 1; 
+  border: 2px solid #ddd;
+  height: 200px;
+  padding: 10px;
+  border-radius: 4px;
+  max-height: 200px;
+  margin: 20px auto; 
+  background: white;
+  width: 80%;
+}
+
+.documents-result-text {
+  color: #888;
+  text-align: left;
+  padding: 10px;
+}
+
+.download-document-button {
+  margin: 0px;
+  font-size: 15px;
+  margin-left: 10px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #b8b4b4;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #ccc8c8;
+  font-family: 'Courier New', Courier, monospace;
+  color: black;
+  transition: background-color 0.3s;
+  justify-content: space-between;
+  margin-top: 0px;
+}
+
+.download-document-button:hover {
+  background-color: #e9e0e0; 
+}

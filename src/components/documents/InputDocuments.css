@@ -1,0 +1,48 @@
+.input-document-button {
+  width: 50%;
+  flex: 1; 
+  font-family: 'Courier New', Courier, monospace;
+  font-size: large;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #f7f4f4;
+  margin-top: 20px;
+}
+
+.input-document-button:hover {
+  background-color: #dddcdc; 
+}
+
+.documents-display-box {
+  flex: 1; 
+  border: 2px solid #ddd;
+  height: 200px;
+  padding: 10px;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;  /* enables vertical scroll */
+  overflow-x: hidden;
+  margin: 20px auto; 
+  background: white;
+  width: 80%;
+}
+
+.document-name{
+  padding: 5px 0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 18px;
+  border: #0d3f81;
+  border-radius: 5px;
+  border: black;
+  margin: 10px 10px;
+}
+
+.remove-document-button {
+  margin-left: 10px;
+  font-size: 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #fa0000;
+}
