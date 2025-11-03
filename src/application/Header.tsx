@@ -15,11 +15,16 @@ interface HeaderProps {
 
 export default function Header({ activeTab, onTabChange, showAbout, onToggleAbout }: HeaderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-const [logo, setLogo] = useState<typeof lightLogo | typeof darkLogo>(lightLogo);
+  const [logo, setLogo] = useState<typeof lightLogo | typeof darkLogo>(lightLogo);
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'light';
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const savedLogo = localStorage.getItem('logo') === darkLogo ? darkLogo : lightLogo;
+    setLogo(savedLogo);
+    document.documentElement.setAttribute('logo-theme', savedLogo);
   }, []);
 
   const toggleTheme = () => {
@@ -28,7 +33,9 @@ const [logo, setLogo] = useState<typeof lightLogo | typeof darkLogo>(lightLogo);
     setLogo(newLogo)
     setTheme(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+    document.documentElement.setAttribute('logo-theme', newLogo);
     localStorage.setItem('theme', newTheme);
+    localStorage.setItem('logo', newLogo);
   };
 
   const tabs: { id: TabType; label: string }[] = [

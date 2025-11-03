@@ -8,10 +8,15 @@ export default function TextTools() {
   const [replaceText, setReplaceText] = useState('');
   const [results, setResults] = useState('No results to display.');
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [expandedTextarea, setExpandedTextarea] = useState(false);
 
   const words = content.trim() === "" ? 0 : content.trim().split(/\s+/).length;
   const chars = content.length;
   const lines = content ? content.split('\n').length : 0;
+
+  const toggleExpand = () => {
+    setExpandedTextarea(!expandedTextarea);
+  };
 
   const handleCursorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCursorPosition(e.target.selectionStart);
@@ -59,6 +64,45 @@ export default function TextTools() {
     setResults(result);
   };
 
+  const handleFileBrowse = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        setContent(content);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const readFileContent = (file: File, callback: (content: string) => void) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      callback(content);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      readFileContent(file, setContent);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCopyResultToInput = () => {
+    setContent(results);
+  };
+
   const handleClear = () => {
     setContent('');
     setResults('No results to display.');
@@ -72,20 +116,34 @@ export default function TextTools() {
       <div className="card mb-3">
         <div className="card-header">
           <h2 className="card-title">Text Content</h2>
-          <button className="btn btn-secondary">
+          <label className="btn btn-secondary">
             <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             Browse
-          </button>
+            <input
+              type="file"
+              accept="*/*"
+              style={{ display: 'none' }}
+              onChange={handleFileBrowse}
+            />
+          </label>
         </div>
         <textarea
-          className="textarea"
+          className={expandedTextarea ? "textarea-expanded" : "textarea"}
           style={{ minHeight: '350px' }}
           placeholder="Enter Content (Alt + Z to expand)"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onSelect={handleCursorChange}
+          onKeyDown={(e) => {
+            if (e.altKey && e.key === "z") {
+              e.preventDefault();
+              toggleExpand();
+            }
+          }}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
         />
         <div className="stats">
           <small>
@@ -153,6 +211,12 @@ export default function TextTools() {
         <div className="results-area">
           {results}
         </div>
+        <button className="btn btn-outline" onClick={handleCopyResultToInput} style={{ marginTop: '20px' }}>
+          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          Copy to Input Text Content
+        </button>
       </div>
 
       <div className="footer-container">Internally Developed - For Internal Use - Version 3.0</div>

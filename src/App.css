@@ -297,7 +297,7 @@ body {
 }
 
 .textarea-expanded {
-      position: fixed;
+    position: fixed;
     top: 15%;
     left: 5%;
     right: 5%;
@@ -309,12 +309,13 @@ body {
     z-index: 3000;
     font-size: 1.1rem;
     padding: 1rem;
-    border: 2px solid #1976d2;
-    background-color: #ffffff;
+    border: 1.5px solid var(--border-color);
+    background-color: var(--bg-input);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     resize: vertical;
     overflow: auto;
     transition: all 0.1s ease;
+    color: var(--text-primary);
 }
 
 .input {
