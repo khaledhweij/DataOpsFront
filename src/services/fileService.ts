@@ -1,8 +1,5 @@
 export function downloadZipFromBase64(base64: string): void {
-  const content = base64 ?? "";
-  if (!content.trim()) throw new Error("Content cannot be empty.");
-
-  const byteArray = Uint8Array.from(atob(content), c => c.charCodeAt(0));
+  const byteArray = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
   const blob = new Blob([byteArray], { type: "application/zip" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -12,7 +9,6 @@ export function downloadZipFromBase64(base64: string): void {
 }
 
 export function viewPdfFromBase64(pdfBase64: string): void {
-  if (!pdfBase64.trim()) throw new Error("Content cannot be empty.");
   const byteArray = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
   const blob = new Blob([byteArray], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);

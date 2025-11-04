@@ -39,8 +39,8 @@ export default class TextComparator {
         formattedText1 += `<span style="color: #e74c3c; white-space: pre-wrap;">${escapedValue}</span>`;
       } else {
         unchanged++;
-        formattedText1 += `<span style="color: #000; white-space: pre-wrap;">${escapedValue}</span>`;
-        formattedText2 += `<span style="color: #000; white-space: pre-wrap;">${escapedValue}</span>`;
+        formattedText1 += `<span style="color: var(--text-tertiary); white-space: pre-wrap;">${escapedValue}</span>`;
+        formattedText2 += `<span style="color: var(--text-tertiary); white-space: pre-wrap;">${escapedValue}</span>`;
       }
     });
 

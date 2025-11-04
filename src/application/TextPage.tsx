@@ -9,13 +9,18 @@ export default function TextTools() {
   const [results, setResults] = useState('No results to display.');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [expandedTextarea, setExpandedTextarea] = useState(false);
-
+  const [expandedResultTextarea, setExpandedResultTextarea] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const words = content.trim() === "" ? 0 : content.trim().split(/\s+/).length;
   const chars = content.length;
   const lines = content ? content.split('\n').length : 0;
 
   const toggleExpand = () => {
     setExpandedTextarea(!expandedTextarea);
+  };
+
+  const toggleExpandedResult = () => {
+    setExpandedResultTextarea(!expandedResultTextarea);
   };
 
   const handleCursorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -103,6 +108,15 @@ export default function TextTools() {
     setContent(results);
   };
 
+  const handleCopyResultToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(results);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 1000); // hide after 1s
+    } catch (err) {
+    }
+  };
+
   const handleClear = () => {
     setContent('');
     setResults('No results to display.');
@@ -137,7 +151,7 @@ export default function TextTools() {
           onChange={(e) => setContent(e.target.value)}
           onSelect={handleCursorChange}
           onKeyDown={(e) => {
-            if (e.altKey && e.key === "z") {
+            if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
               e.preventDefault();
               toggleExpand();
             }
@@ -208,14 +222,30 @@ export default function TextTools() {
 
       <div className="card">
         <h3 className="card-subtitle">Results</h3>
-        <div className="results-area">
-          {results}
-        </div>
+        <textarea
+          className={expandedResultTextarea ? "textarea-expanded" : "textarea"}
+          readOnly
+          value={results || ""}
+          placeholder="No results to display."
+          onKeyDown={(e) => {
+            if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+              e.preventDefault();
+              toggleExpandedResult();
+            }
+          }}
+        />
         <button className="btn btn-outline" onClick={handleCopyResultToInput} style={{ marginTop: '20px' }}>
           <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
           Copy to Input Text Content
+        </button>
+
+        <button className="btn btn-outline" onClick={handleCopyResultToClipboard} style={{ marginTop: '20px', marginLeft: '10px' }}>
+          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          {isCopied ? "Copied!" : "Copy to clipboard"}
         </button>
       </div>
 

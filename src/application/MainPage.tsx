@@ -1,13 +1,23 @@
 // pages/NewMainPage.tsx
 import { useState } from 'react';
 import './MainPage.css';
+import { autoBeautify, autoValidate, decodeBase64, decodeJwt, decodeUrl, decodeUuid, encodeBase64, encodeUrl } from '../functions/MainUtils';
+import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from '../services/fileService';
+import { convertToEpoch } from '../services/dateService';
+import TextComparator, { ComparisonResult } from '../functions/TextComparator';
 
 export default function NewMainPage() {
   const [firstContent, setFirstContent] = useState('');
   const [secondContent, setSecondContent] = useState('');
   const [results, setResults] = useState('No results to display.');
+  const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [expandedTextarea1, setExpandedTextarea1] = useState(false);
   const [expandedTextarea2, setExpandedTextarea2] = useState(false);
+  const [expandedResultTextarea, setExpandedResultTextarea] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [lastFocusedTextarea, setLastFocusedTextarea] = useState<'first' | 'second' | null>(null);
+
+  const comparator = new TextComparator();
 
   const toggleExpand1 = () => {
     setExpandedTextarea1(!expandedTextarea1);
@@ -15,6 +25,10 @@ export default function NewMainPage() {
 
   const toggleExpand2 = () => {
     setExpandedTextarea2(!expandedTextarea2);
+  };
+
+  const toggleExpandedResult = () => {
+    setExpandedResultTextarea(!expandedResultTextarea);
   };
 
   const readFileContent = (file: File, callback: (content: string) => void) => {
@@ -64,10 +78,25 @@ export default function NewMainPage() {
   };
 
   const handleCompare = () => {
+    if (!firstContent && !secondContent) {
+      setResults('Please enter content to compare.');
+      setComparisonResult(null);
+      return;
+    }
+
     if (firstContent === secondContent) {
       setResults('✓ Contents are identical');
     } else {
-      setResults('✗ Contents are different');
+
+
+      const result = comparator.compare(firstContent, secondContent);
+      setComparisonResult(result);
+
+      if (result.hasDifferences) {
+        setResults(`Found ${result.additions} additions and ${result.deletions} deletions`);
+      } else {
+        setResults('✓ Contents are identical');
+      }
     }
   };
 
@@ -79,11 +108,160 @@ export default function NewMainPage() {
     setSecondContent(results);
   };
 
+  const handleCopyResultToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(results);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 1000); // hide after 1s
+    } catch (err) {
+    }
+  };
+
+  const getContent = () => {
+    if (lastFocusedTextarea === 'first') {
+      return firstContent;
+    } else if (lastFocusedTextarea === 'second') {
+      return secondContent;
+    }
+    return firstContent; // default fallback
+  };
+
+  const handleBeautify = () => {
+    try {
+      const content = getContent();
+      const beautified = autoBeautify(content);
+      setResults(beautified);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleValidate = () => {
+    const content = getContent();
+    const result = autoValidate(content);
+    alert(`${result.type}: ${result.message}`);
+  };
+
+  const handleConvert = () => {
+    try {
+      const content = getContent();
+      const beautified = autoBeautify(content);
+      setResults(beautified);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleEpochConvert = () => {
+    try {
+      const content = getContent();
+      const converted = convertToEpoch(content);
+      setResults(converted);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleDecompressZip = () => {
+    try {
+      const content = getContent();
+      downloadZipFromBase64(content);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleViewPdf = () => {
+    try {
+      const content = getContent();
+      viewPdfFromBase64(content);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleViewHtml = () => {
+    try {
+      const content = getContent();
+      viewHtmlFromBase64(content);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleDecode = () => {
+    try {
+      const content = getContent();
+      const decoded = decodeBase64(content);
+      setResults(decoded);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+
+  const handleEncode = () => {
+    try {
+      const content = getContent();
+      const encoded = encodeBase64(content);
+      setResults(encoded);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+
+  const handleDecodeJwt = () => {
+    try {
+      const content = getContent();
+      const decodedJwt = decodeJwt(content);
+      setResults(decodedJwt);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+  const handleDecodeUuid = () => {
+    try {
+      const content = getContent();
+      const decodedUuid = decodeUuid(content);
+      setResults(decodedUuid);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+  const handleDecodeUrl = () => {
+    try {
+      const content = getContent();
+      const decodedUrl = decodeUrl(content);
+      setResults(decodedUrl);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+  const handleEncodeUrl = () => {
+    try {
+      const content = getContent();
+      const encodedUrl = encodeUrl(content);
+      setResults(encodedUrl);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
 
   const handleClear = () => {
     setFirstContent('');
     setSecondContent('');
     setResults('No results to display.');
+    setComparisonResult(null);
   };
 
   return (
@@ -113,25 +291,26 @@ export default function NewMainPage() {
               value={firstContent}
               onChange={(e) => setFirstContent(e.target.value)}
               onKeyDown={(e) => {
-                if (e.altKey && e.key === "z") {
+                if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
                   e.preventDefault();
                   toggleExpand1();
                 }
               }}
               onDrop={handleFirstDrop}
               onDragOver={handleDragOver}
+              onFocus={() => setLastFocusedTextarea('first')}
             />
           </div>
 
           <div className="card">
             <h3 className="card-subtitle">Encoding & Decoding</h3>
             <div className="button-grid button-grid-2">
-              <button className="btn btn-outline">Decode</button>
-              <button className="btn btn-outline">Encode</button>
-              <button className="btn btn-outline">Decode JWT</button>
-              <button className="btn btn-outline">Decode UUID</button>
-              <button className="btn btn-outline">Decode URL</button>
-              <button className="btn btn-outline">Encode URL</button>
+              <button className="btn btn-outline" onClick={handleDecode}>Decode</button>
+              <button className="btn btn-outline" onClick={handleEncode}>Encode</button>
+              <button className="btn btn-outline" onClick={handleDecodeJwt}>Decode JWT</button>
+              <button className="btn btn-outline" onClick={handleDecodeUuid}>Decode UUID</button>
+              <button className="btn btn-outline" onClick={handleDecodeUrl}>Decode URL</button>
+              <button className="btn btn-outline" onClick={handleEncodeUrl}>Encode URL</button>
               <button className="btn btn-outline">Decode EBCDIC</button>
               <button className="btn btn-outline">Encode EBCDIC</button>
             </div>
@@ -162,27 +341,28 @@ export default function NewMainPage() {
               value={secondContent}
               onChange={(e) => setSecondContent(e.target.value)}
               onKeyDown={(e) => {
-                if (e.altKey && e.key === "z") {
+                if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
                   e.preventDefault();
                   toggleExpand2();
                 }
               }}
               onDrop={handleSecondDrop}
               onDragOver={handleDragOver}
+              onFocus={() => setLastFocusedTextarea('second')}
             />
           </div>
 
           <div className="card">
             <h3 className="card-subtitle">Utilities</h3>
             <div className="button-grid button-grid-2">
-              <button className="btn btn-outline">Beautify</button>
-              <button className="btn btn-outline">Decrypt</button>
-              <button className="btn btn-outline">Validate</button>
-              <button className="btn btn-outline">Convert</button>
-              <button className="btn btn-outline">Epoch Converter</button>
-              <button className="btn btn-outline">Decompress ZIP</button>
-              <button className="btn btn-outline">View PDF</button>
-              <button className="btn btn-outline">View HTML</button>
+              <button className="btn btn-outline" onClick={handleBeautify}>Beautify</button>
+              <button className="btn btn-outline" >Decrypt</button>
+              <button className="btn btn-outline" onClick={handleValidate}>Validate</button>
+              <button className="btn btn-outline" onClick={handleConvert}>Convert</button>
+              <button className="btn btn-outline" onClick={handleEpochConvert}>Epoch Converter</button>
+              <button className="btn btn-outline" onClick={handleDecompressZip}>Decompress ZIP</button>
+              <button className="btn btn-outline" onClick={handleViewPdf}>View PDF</button>
+              <button className="btn btn-outline" onClick={handleViewHtml}>View HTML</button>
             </div>
           </div>
         </div>
@@ -197,22 +377,115 @@ export default function NewMainPage() {
       {/* Results */}
       <div className="card">
         <h3 className="card-subtitle">Results</h3>
-        <div className="results-area">
-          {results}
-        </div>
-        <button className="btn btn-outline" onClick={handleCopyResultToFirstInput} style={{ marginTop: '20px' }}>
-          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-          Copy to First Input Text Content
-        </button>
 
-        <button className="btn btn-outline" onClick={handleCopyResultToSecondInput} style={{ marginTop: '20px' , marginLeft: '10px' }}>
-          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-          Copy to Second Input Text Content
-        </button>
+        {comparisonResult ? (
+          <div className="comparison-results">
+            {/* Stats Summary */}
+            <div className="comparison-stats">
+              <div className="stat-card stat-similarity">
+                <div className="stat-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{comparisonResult.similarityPercentage}%</div>
+                  <div className="stat-label">Similarity</div>
+                </div>
+              </div>
+
+              <div className="stat-card stat-additions">
+                <div className="stat-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{comparisonResult.additions}</div>
+                  <div className="stat-label">Additions</div>
+                </div>
+              </div>
+
+              <div className="stat-card stat-deletions">
+                <div className="stat-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
+                  </svg>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{comparisonResult.deletions}</div>
+                  <div className="stat-label">Deletions</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Side by Side Comparison */}
+            <div className="comparison-container">
+              <div className="comparison-column">
+                <div className="comparison-header">
+                  <svg className="comparison-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  <span>Original (Deletions in Red)</span>
+                </div>
+                <div
+                  className="comparison-content"
+                  dangerouslySetInnerHTML={{ __html: comparisonResult.formattedText1 }}
+                />
+              </div>
+
+              <div className="comparison-divider"></div>
+
+              <div className="comparison-column">
+                <div className="comparison-header">
+                  <svg className="comparison-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                  <span>Modified (Additions in Green)</span>
+                </div>
+                <div
+                  className="comparison-content"
+                  dangerouslySetInnerHTML={{ __html: comparisonResult.formattedText2 }}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <textarea
+              className={expandedResultTextarea ? "textarea-expanded" : "textarea"}
+              readOnly
+              value={results || ""}
+              placeholder="No results to display."
+              onKeyDown={(e) => {
+                if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+                  e.preventDefault();
+                  toggleExpandedResult();
+                }
+              }}
+            />
+            <button className="btn btn-outline" onClick={handleCopyResultToFirstInput} style={{ marginTop: '20px' }}>
+              <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy to First Input Text Content
+            </button>
+
+            <button className="btn btn-outline" onClick={handleCopyResultToSecondInput} style={{ marginTop: '20px', marginLeft: '10px' }}>
+              <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy to Second Input Text Content
+            </button>
+
+            <button className="btn btn-outline" onClick={handleCopyResultToClipboard} style={{ marginTop: '20px', marginLeft: '10px' }}>
+              <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              {isCopied ? "Copied!" : "Copy to clipboard"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

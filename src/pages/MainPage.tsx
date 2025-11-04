@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import InputContent from "../components/mainPage/InputContent";
 import Button from "../components/mainPage/Buttons";
 import OutputResult from "../components/mainPage/OutputResult";
-import logo from "../constants/header-logo.png";
+import logo from "../assets/edicom-logo.png";
 import BaseButtons from "../components/mainPage/BaseButtons";
 import ComparasionResult from "../components/mainPage/ComparasionResult";
 import { convertToEpoch } from "../services/dateService";

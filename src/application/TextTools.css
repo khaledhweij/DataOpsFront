@@ -27,7 +27,8 @@
 }
 
 .results-area {
-  min-height: 120px;
+  min-height: 300px;
+  max-height: 300px;
   display: flex;
   align-items: center;
   justify-content: start;
@@ -39,6 +40,8 @@
   border: 1px solid var(--border-color);
   white-space: pre-wrap;
   word-break: break-word;
+  resize: vertical;
+  overflow-y: auto;
 }
 
 /* pages/MainPage.css */
