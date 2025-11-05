@@ -4,32 +4,18 @@ import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from "..
 import TextComparator from "./TextComparator";
 
 export const backendApiHandler = (
-  getContent: () => string,
+  action: string,
+  content: string,
   setOutput: (val: string) => void,
+  isAlert: boolean = false
   ) => {
-  return async (action: string, isAlert = false) => {
+  return async () => {
 
     setOutput("");
 
     try {
-      const content = getContent();
       if (!content.trim()) {
         alert("Content cannot be empty.");
-        return;
-      }
-
-      if (action === "showPdf") {
-        viewPdfFromBase64(content);
-        return;
-      }
-
-      if (action === "showHtml") {
-        viewHtmlFromBase64(content);
-        return;
-      }
-
-      if (action === "downloadZip") {
-        downloadZipFromBase64(content);
         return;
       }
 

@@ -293,7 +293,7 @@ body {
 
 .textarea::placeholder,
 .input::placeholder {
-  color: var(--text-tertiary);
+  color: var(--text-primary);
 }
 
 .textarea-expanded {

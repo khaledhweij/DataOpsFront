@@ -15,6 +15,11 @@ export default function TextTools() {
   const chars = content.length;
   const lines = content ? content.split('\n').length : 0;
 
+  const escapeRegExp = (str: string) =>
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const regex = new RegExp(escapeRegExp(findText), "g");
+
   const toggleExpand = () => {
     setExpandedTextarea(!expandedTextarea);
   };
@@ -42,14 +47,31 @@ export default function TextTools() {
     setResults(result);
   };
 
-  const handleSentenceCase = () => {
-    const result = content.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, (c) => c.toUpperCase());
+  const handleNumberLines = () => {
+    const result = content.split('\n').map((line, index) => `${index + 1}- ${line}`).join('\n');
     setResults(result);
   };
 
   const handleReplaceAll = () => {
     if (findText) {
-      const result = content.split(findText).join(replaceText);
+      const result = content.replace(regex, replaceText);
+      setResults(result);
+    }
+  };
+
+  const handleLineBreaksAfter = () => {
+    const result = content.replace(regex, findText + '\n');
+    setResults(result);
+  };
+
+  const handleMergeLinesAfter = () => {
+    const result = content.replace(new RegExp(`${escapeRegExp(findText)}\\s*\\n`, "g"), `${findText} `);
+    setResults(result);
+  };
+
+  const handleRemoveCharacters = () => {
+    if (findText) {
+      const result = content.replace(regex, "");
       setResults(result);
     }
   };
@@ -174,7 +196,7 @@ export default function TextTools() {
             <button className="btn btn-outline" onClick={handleUpperCase}>UPPERCASE</button>
             <button className="btn btn-outline" onClick={handleLowerCase}>lowercase</button>
             <button className="btn btn-outline" onClick={handleTitleCase}>TitleCase</button>
-            <button className="btn btn-outline" onClick={handleSentenceCase}>Sentence case</button>
+            <button className="btn btn-outline" onClick={handleNumberLines}>Number the Lines</button>
           </div>
         </div>
 
@@ -182,9 +204,9 @@ export default function TextTools() {
           <h3 className="card-subtitle">Text Manipulation</h3>
           <div className="button-grid">
             <button className="btn btn-outline" onClick={handleReplaceAll}>Replace All</button>
-            <button className="btn btn-outline">Line Breaks After</button>
-            <button className="btn btn-outline">Merge Lines After</button>
-            <button className="btn btn-outline">Remove Characters</button>
+            <button className="btn btn-outline" onClick={handleLineBreaksAfter}>Line Breaks After</button>
+            <button className="btn btn-outline" onClick={handleMergeLinesAfter}>Merge Lines After</button>
+            <button className="btn btn-outline" onClick={handleRemoveCharacters}>Remove Characters</button>
           </div>
         </div>
 

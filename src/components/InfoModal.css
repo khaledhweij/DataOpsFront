@@ -6,13 +6,12 @@
   width: 100%;
   height: 100%;
   backdrop-filter: blur(6px);
-  background: rgba(0, 0, 0, 0.4);
-
+  background-color: rgba(0, 0, 0, 0.55);
   display: flex;
-  justify-content: center;
   align-items: center;
-
-  z-index: 2000;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.1s ease-in-out;
 }
 
 /* Center popup */
@@ -20,33 +19,104 @@
   background: var(--bg-card);
   padding: 25px 35px;
   border-radius: 10px;
-  width: 400px;
+  width: 600px;
   max-width: 80%;
-  text-align: center;
+  text-align: start;
   border: 1px solid var(--border-color);
 
   animation: fadeIn 0.25s ease-out;
 }
 
-/* Close button */
 .close-modal-btn {
-  margin-top: 20px;
+  margin: 20px auto 0;
   padding: 8px 15px;
+  width: 70px;
   border: none;
   cursor: pointer;
   font-size: 14px;
   border-radius: 4px;
-  background: #6c5ce7;
-  color: #fff;
+  background: #150879d7;
+  color: #ffffff;
   transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 
 .close-modal-btn:hover {
   opacity: 0.85;
+}
+
+/* ===== Title ===== */
+.modal-box h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* ===== Paragraphs ===== */
+.modal-box p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.modal-box p strong {
+  color: var(--text-primary);
+}
+
+
+/* ===== Lists ===== */
+.modal-box ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.modal-box li {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.modal-box li strong {
+  color: var(--text-primary);
+}
+
+/* ===== Section Headings ===== */
+.modal-box h2.text-xl {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+
+/* ===== Scrollbar Styling (optional) ===== */
+.modal-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-box::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
 }
 
 /* Fade animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

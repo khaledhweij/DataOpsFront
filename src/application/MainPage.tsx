@@ -1,7 +1,7 @@
 // pages/NewMainPage.tsx
 import { useState } from 'react';
 import './MainPage.css';
-import { autoBeautify, autoValidate, decodeBase64, decodeJwt, decodeUrl, decodeUuid, encodeBase64, encodeUrl } from '../functions/MainUtils';
+import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, decodeUuid, encodeBase64, encodeUrl } from '../functions/MainUtils';
 import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from '../services/fileService';
 import { convertToEpoch } from '../services/dateService';
 import TextComparator, { ComparisonResult } from '../functions/TextComparator';
@@ -142,11 +142,18 @@ export default function NewMainPage() {
     alert(`${result.type}: ${result.message}`);
   };
 
-  const handleConvert = () => {
+  const handleDecrypt = () => {
     try {
       const content = getContent();
-      const beautified = autoBeautify(content);
-      setResults(beautified);
+      backendApiHandler("decrypt", content, setResults, true);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  }
+
+  const handleConvert = () => {
+    try {
+      alert("Convert function is not yet implemented.");
     } catch (error) {
       alert((error as Error).message);
     }
@@ -356,7 +363,7 @@ export default function NewMainPage() {
             <h3 className="card-subtitle">Utilities</h3>
             <div className="button-grid button-grid-2">
               <button className="btn btn-outline" onClick={handleBeautify}>Beautify</button>
-              <button className="btn btn-outline" >Decrypt</button>
+              <button className="btn btn-outline" onClick={handleDecrypt}>Decrypt</button>
               <button className="btn btn-outline" onClick={handleValidate}>Validate</button>
               <button className="btn btn-outline" onClick={handleConvert}>Convert</button>
               <button className="btn btn-outline" onClick={handleEpochConvert}>Epoch Converter</button>
