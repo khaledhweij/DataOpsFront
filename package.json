@@ -12,6 +12,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "diff": "^8.0.2",
+    "pdf-lib": "^1.17.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",

@@ -1,0 +1,178 @@
+.pdf-tools .button-grid-4 {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+  .pdf-tools .button-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.file-upload-area {
+  min-height: 300px;
+  border: 2px dashed var(--border-color);
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-input);
+  transition: all var(--transition-base);
+  padding: 2rem;
+  cursor: pointer;
+}
+
+.file-list {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.file-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 159, 189, 0.1);
+}
+
+.file-item-remove {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.file-item-remove:hover {
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+.file-item-remove svg {
+  width: 16px;
+  height: 16px;
+}
+
+.file-item-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.file-item-name {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-item-size {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.file-upload-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--text-tertiary);
+  margin-bottom: 1rem;
+}
+
+.file-upload-text {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.file-upload-hint {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
+.page-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-number {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.input-number:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 159, 189, 0.1);
+}
+
+.footer-container {
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding-top: 5px;
+  padding-left: 5px;
+  margin-top: 20px;
+  margin-bottom: -25px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.result-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
