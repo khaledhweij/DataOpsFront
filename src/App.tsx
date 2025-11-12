@@ -1,31 +1,8 @@
-// import React from "react";
-// import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-// import MainPage from "./pages/MainPage";
-// import DocumentsPage from "./pages/DocumentsPage";
-// import TextPage from "./pages/TextPage";
-// import './App.css';
-
-// function App() {
-//   return (
-//     <Router>
-//       <Routes>
-//         <Route path="/" element={<MainPage />} />
-//         <Route path="/DocumentsPage" element={<DocumentsPage />} />
-//         <Route path="/TextPage" element={<TextPage />} />
-//       </Routes>
-//     </Router>
-//   );
-// }
-
-// export default App;
-
-
-// App.tsx
 import { useState } from 'react';
-import Header from './application/Header';
-import MainPage from './application/MainPage';
-import TextTools from './application/TextPage';
-import PdfTools from './application/PdfPage';
+import Header from './components/Header';
+import MainPage from './pages/MainPage';
+import TextTools from './pages/TextPage';
+import PdfTools from './pages/PdfPage';
 import './App.css';
 import InfoModal from './components/InfoModal';
 
