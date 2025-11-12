@@ -3,40 +3,38 @@ import { convertToEpoch } from "../services/dateService";
 import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from "../services/fileService";
 import TextComparator from "./TextComparator";
 
-export const backendApiHandler = (
+export const backendApiHandler = async (
   action: string,
   content: string,
-  setOutput: (val: string) => void,
   isAlert: boolean = false
-  ) => {
-  return async () => {
-
-    setOutput("");
-
-    try {
-      if (!content.trim()) {
-        alert("Content cannot be empty.");
-        return;
-      }
-
-      const response = await postActionRaw(action, content);
-      if (response.ok) {
-        const data = await response.text();
-        if (isAlert) {
-          alert(data);
-        } else {
-          setOutput(data);
-        }
-      } else {
-        const error = await response.text();
-        alert(error);
-      }
-    } catch (error) {
-      setOutput(`Fetch error: ${(error as Error).message}`);
+): Promise<string> => {
+  try {
+    if (!content.trim()) {
+      alert("Content cannot be empty.");
+      return "";
     }
-  };
-};
 
+    const response = await postActionRaw(action, content);
+
+    if (response.ok) {
+      const data = await response.text();
+
+      if (isAlert) {
+        alert(data);
+      }
+
+      return data;
+    } else {
+      const error = await response.text();
+      alert(error);
+      return error;
+    }
+  } catch (error) {
+    const errMsg = `Fetch error: ${(error as Error).message}`;
+    alert(errMsg);
+    return errMsg;
+  }
+};
 
 // ===== AUTO-DETECT BEAUTIFY =====
 export const autoBeautify = (content: string): string => {
@@ -54,7 +52,7 @@ export const autoBeautify = (content: string): string => {
     /^\s*\d+\s+[^\s]+\s+0x[0-9a-f]+/m, // Native stack traces
   ];
   
-  if (stackTracePatterns.some(pattern => pattern.test(trimmed))) {
+  if (isStackTrace(trimmed)) {
     return beautifyStackTrace(trimmed);
   }
   
@@ -91,28 +89,19 @@ export const autoBeautify = (content: string): string => {
   return trimmed;
 };
 
-const beautifyStackTrace = (stackTrace: string): string => {
-  const lines = stackTrace.split('\n');
-  let formatted = '';
-  
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    
-    // Main error message
-    if (trimmedLine.match(/\w+(Error|Exception):/)) {
-      formatted += `\n${trimmedLine}\n${'─'.repeat(60)}\n`;
-    }
-    // Stack frame with "at"
-    else if (trimmedLine.startsWith('at ')) {
-      formatted += `  ${trimmedLine}\n`;
-    }
-    // Other lines
-    else if (trimmedLine) {
-      formatted += `${trimmedLine}\n`;
-    }
-  }
-  
-  return formatted.trim();
+const isStackTrace = (input: string): boolean => {
+  return (
+    input.includes("Exception:") ||
+    input.includes("Error:") ||
+    /\s+at\s+\S+\([\s\S]*\.\w+:\d+\)/.test(input)
+  );
+};
+
+const beautifyStackTrace = (content: string): string => {
+  return content
+    .replace(/ at /g, "\n\tat ")
+    .replace(/Caused by:/g, "\nCaused by:")
+    .trim();
 };
 
 // ===== AUTO-DETECT VALIDATION =====

@@ -1,8 +1,8 @@
 // components/Header.tsx
 import { useState, useEffect } from 'react';
 import './Header.css';
-import lightLogo from "../assets/edicom-logo.png"
-import darkLogo from "../assets/edicom-logo-dark.png"
+import lightLogo from "../assets/DataOpsLogo.png"
+import darkLogo from "../assets/DataOpsLogo_dark.png"
 
 type TabType = 'main' | 'text' | 'pdf';
 
@@ -48,15 +48,15 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
     <header className="header">
       <div className="header-container">
         <div className="header-top">
-          <div className="logo-container">
-            <img src={logo} alt="Logo" className="logo" />
-          </div>
+
           <div className="logo-section">
             <div>
               <span className="header-text">DataOps</span>
             </div>
           </div>
-
+          <div className="logo-container">
+            <img src={logo} alt="Logo" className="logo" />
+          </div>
           <div className="header-controls">
             <button
               className="icon-button"

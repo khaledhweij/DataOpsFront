@@ -1,385 +1,566 @@
-import "./MainPage.css";
-import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import InputContent from "../components/mainPage/InputContent";
-import Button from "../components/mainPage/Buttons";
-import OutputResult from "../components/mainPage/OutputResult";
-import logo from "../assets/edicom-logo.png";
-import BaseButtons from "../components/mainPage/BaseButtons";
-import ComparasionResult from "../components/mainPage/ComparasionResult";
-import { convertToEpoch } from "../services/dateService";
-import { downloadZipFromBase64 as downloadZip } from "../services/fileService";
-import { postActionRaw } from "../services/apiService";
-import { useContent } from "../hooks/useContent";
-import { JSX } from "react/jsx-runtime";
-import TopNavigation from "../components/TopNavigation";
-import TextComparator from "../functions/TextComparator";
+// pages/NewMainPage.tsx
+import { useState } from 'react';
+import './MainPage.css';
+import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, decodeUuid, encodeBase64, encodeUrl } from '../functions/MainUtils';
+import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from '../services/fileService';
+import { convertToEpoch } from '../services/dateService';
+import TextComparator, { ComparisonResult } from '../functions/TextComparator';
+
+export default function NewMainPage() {
+  const [firstContent, setFirstContent] = useState('');
+  const [secondContent, setSecondContent] = useState('');
+  const [results, setResults] = useState('No results to display.');
+  const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
+  const [expandedTextarea1, setExpandedTextarea1] = useState(false);
+  const [expandedTextarea2, setExpandedTextarea2] = useState(false);
+  const [expandedResultTextarea, setExpandedResultTextarea] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [lastFocusedTextarea, setLastFocusedTextarea] = useState<'first' | 'second' | null>(null);
+  const [showOnlyDifferences, setShowOnlyDifferences] = useState(false);
   
-type Nullable<T> = T | null;
+  const comparator = new TextComparator();
 
-export default function MainPage(): JSX.Element {
-  // Content states
-  const [firstContent, setFirstContent] = useState<string>("");
-  const [secondContent, setSecondContent] = useState<string>("");
-  const [firstFileName, setFirstFileName] = useState<string>("");
-  const [secondFileName, setSecondFileName] = useState<string>("");
-  const [darkMode, setDarkMode] = useState(false);
-
-  // UI / control states
-  const { output, setOutput } = useContent();
-  const firstFileInputRef = useRef<HTMLInputElement>(null);
-  const secondFileInputRef = useRef<HTMLInputElement>(null);
-  const [activeInput, setActiveInput] = useState<string>("1");
-  const [showDiv, setShowDiv] = useState<boolean>(false);
-  const [firstComparedOutput, setFirstComparedOutput] = useState<string>("");
-  const [secondComparedOutput, setSecondComparedOutput] = useState<string>("");
-  const [textToReplace, setTextToReplace] = useState<string>("");
-  const [replacementText, setReplacementText] = useState<string>("");
-  const navigate = useNavigate();
-  const [expandedTextarea, setExpandedTextarea] = useState<string | null>(null); // "1" or "2" or null
-  const firstTextareaRef = useRef<Nullable<HTMLTextAreaElement>>(null);
-  const secondTextareaRef = useRef<Nullable<HTMLTextAreaElement>>(null);
-  const [resultHtml, setResultHtml] = useState("");
-
-  // --- getContent: keeps selection behavior (Option A)
-  const getContent = (): string => {
-    const textarea = activeInput === "1" ? firstTextareaRef.current : secondTextareaRef.current;
-
-    if (textarea) {
-      const selectionStart = textarea.selectionStart ?? 0;
-      const selectionEnd = textarea.selectionEnd ?? 0;
-
-      if (selectionStart !== selectionEnd) {
-        return textarea.value.substring(selectionStart, selectionEnd);
-      }
-    }
-
-    return activeInput === "1" ? firstContent : secondContent;
+  const toggleExpand1 = () => {
+    setExpandedTextarea1(!expandedTextarea1);
   };
 
-  // --- compare
-  const compareContents = async () => {
-    try {
-      if (!firstContent || !secondContent) {
-        setOutput("Contents cannot be empty.");
-        return;
-      }
+  const toggleExpand2 = () => {
+    setExpandedTextarea2(!expandedTextarea2);
+  };
 
-      const response = await postActionRaw("compare", JSON.stringify({ firstContent, secondContent }));
+  const toggleExpandedResult = () => {
+    setExpandedResultTextarea(!expandedResultTextarea);
+  };
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.firstContent !== "" && data.secondContent !== "") {
-          setFirstComparedOutput(data.firstContent);
-          setSecondComparedOutput(data.secondContent);
-          setShowDiv(true);
-        }
-        setOutput(data.output);
-      } else {
-        const error = await response.text();
-        alert(error);
-      }
-    } catch (error) {
-      setOutput(`Fetch error: ${(error as Error).message}`);
+  const readFileContent = (file: File, callback: (content: string) => void) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      callback(content);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleFirstFileBrowse = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      readFileContent(file, setFirstContent);
     }
   };
 
+  const handleSecondFileBrowse = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      readFileContent(file, setSecondContent);
+    }
+  };
 
+  const handleFirstDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      readFileContent(file, setFirstContent);
+    }
+  };
+
+  const handleSecondDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      readFileContent(file, setSecondContent);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const handleCompare = () => {
-    if (firstContent === secondContent) {
-      setOutput("The contents are identical.");
-    } else {
-      const comparator = new TextComparator();
-      const comparisonResult = comparator.compare(firstContent, secondContent);
-      setFirstComparedOutput(comparisonResult.formattedText1);
-      setSecondComparedOutput(comparisonResult.formattedText2);
-      setShowDiv(true);
-      // setResultHtml();
-    }
-  };
-
-  // const handleCompare = () => {
-  //   if (firstContent === secondContent) {
-  //     setOutput("The contents are identical.");
-  //   } else {
-  //     void compareContents();
-  //   }
-  // };
-
-  // --- clear
-  const handleClear = () => {
-    setFirstContent("");
-    setSecondContent("");
-    setFirstFileName("");
-    setSecondFileName("");
-    setOutput("");
-    setShowDiv(false);
-    setFirstComparedOutput("");
-    setSecondComparedOutput("");
-    setTextToReplace("");
-    setReplacementText("");
-
-    if (firstFileInputRef.current) firstFileInputRef.current.value = "";
-    if (secondFileInputRef.current) secondFileInputRef.current.value = "";
-  };
-
-  // --- view PDF / HTML
-  const handleViewPdf = (pdfString: string) => {
-    try {
-      const byteCharacters = atob(pdfString);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-    } catch (error) {
-      alert("Make sure the content is PDF in base64");
-    }
-  };
-
-  const handleViewHtml = (base64Html: string) => {
-    try {
-      const htmlContent = atob(base64Html);
-      const blob = new Blob([htmlContent], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-    } catch (error) {
-      alert("Ensure the content is a valid base64-encoded HTML string.");
-    }
-  };
-
-  // --- handleGlobal
-  const handleGlobal = async (action: string, isAlert = false) => {
-    setOutput("");
-    try {
-      const content = getContent();
-      if (!content.trim()) {
-        alert("Content cannot be empty.");
-        return;
-      }
-
-      if (action === "showPdf") {
-        handleViewPdf(content);
-        return;
-      }
-      if (action === "showHtml") {
-        handleViewHtml(content);
-        return;
-      }
-
-      const response = await postActionRaw(action, content);
-
-      if (response.ok) {
-        const data = await response.text();
-        if (isAlert) {
-          alert(data);
-        } else if (activeInput === "1") {
-          setFirstContent(data);
-        } else if (activeInput === "2") {
-          setSecondContent(data);
-        } else {
-          setOutput(data);
-        }
-      } else {
-        const error = await response.text();
-        alert(error);
-      }
-    } catch (error) {
-      setOutput(`Fetch error: ${(error as Error).message}`);
-    }
-  };
-
-  // --- handleTextGlobal
-  const handleTextGlobal = async (action: string, search: string, replacement: string) => {
-    setOutput("");
-    try {
-      const text = getContent();
-      if (!text.trim()) {
-        alert("Content cannot be empty.");
-        return;
-      }
-      if (!search) {
-        alert("Pattern to be replaced cannot be empty.");
-        return;
-      }
-
-      const response = await postActionRaw(action, JSON.stringify({ text, search, replacement }));
-
-      if (response.ok) {
-        const data = await response.text();
-        if (activeInput === "1") setFirstContent(data);
-        else if (activeInput === "2") setSecondContent(data);
-        else setOutput(data);
-      } else {
-        const error = await response.text();
-        alert(error);
-      }
-    } catch (error) {
-      setOutput(`Fetch error: ${(error as Error).message}`);
-    }
-  };
-
-  // --- handleTextInternally (keeps selection behavior A: replace only selection)
-  const handleTextInternally = (action: String) => {
-    setOutput("");
-
-    const textarea = activeInput === "1" ? firstTextareaRef.current : secondTextareaRef.current;
-    const fullText = activeInput === "1" ? firstContent : secondContent;
-
-    if (!fullText.trim()) {
-      alert("Content cannot be empty.");
+    if (!firstContent && !secondContent) {
+      setResults('Please enter content to compare.');
+      setComparisonResult(null);
       return;
     }
 
-    let selectionStart = 0;
-    let selectionEnd = 0;
-
-    if (textarea) {
-      selectionStart = textarea.selectionStart ?? 0;
-      selectionEnd = textarea.selectionEnd ?? 0;
-    }
-
-    const hasSelection = selectionStart !== selectionEnd;
-
-    const applyTransform = (input: string) => {
-      switch (action) {
-        case "upperCase":
-          return input.toUpperCase();
-        case "lowerCase":
-          return input.toLowerCase();
-        case "titleCase":
-          return input
-            .toLowerCase()
-            .split(" ")
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-        default:
-          return input;
-      }
-    };
-
-    if (hasSelection) {
-      const before = fullText.substring(0, selectionStart);
-      const selected = fullText.substring(selectionStart, selectionEnd);
-      const after = fullText.substring(selectionEnd);
-      const transformed = applyTransform(selected);
-      const newText = before + transformed + after;
-
-      if (activeInput === "1") setFirstContent(newText);
-      else setSecondContent(newText);
-
-      // re-select transformed text
-      requestAnimationFrame(() => {
-        if (textarea) {
-          textarea.selectionStart = selectionStart;
-          textarea.selectionEnd = selectionStart + transformed.length;
-        }
-      });
+    if (firstContent === secondContent) {
+      setResults('✓ Contents are identical');
     } else {
-      const transformed = applyTransform(fullText);
-      if (activeInput === "1") setFirstContent(transformed);
-      else setSecondContent(transformed);
+
+
+      const result = comparator.compare(firstContent, secondContent);
+      setComparisonResult(result);
+
+      if (result.hasDifferences) {
+        setResults(`Found ${result.additions} additions and ${result.deletions} deletions`);
+      } else {
+        setResults('✓ Contents are identical');
+      }
     }
   };
 
-  // --- epoch
-  const handleEpoch = () => {
-    setOutput("");
+  const handleCopyResultToFirstInput = () => {
+    setFirstContent(results);
+  };
+
+  const handleCopyResultToSecondInput = () => {
+    setSecondContent(results);
+  };
+
+  const handleCopyResultToClipboard = async () => {
     try {
-      const result = convertToEpoch(getContent());
-      setOutput(result);
-    } catch (error) {
-      setOutput(`Converting error: ${(error as Error).message}`);
+      await navigator.clipboard.writeText(results);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 1000); // hide after 1s
+    } catch (err) {
     }
   };
 
-  // --- download zip
-  const downloadZipFromBase64 = () => {
+const getFilteredComparison = () => {
+  if (!comparisonResult || !showOnlyDifferences) return comparisonResult;
+
+  // Extract only the colored parts (removed/added), skip unchanged (var(--text-tertiary))
+  const parser = new DOMParser();
+  
+  const doc1 = parser.parseFromString(comparisonResult.formattedText1, 'text/html');
+  const spans1 = doc1.querySelectorAll('span');
+  let filteredText1 = '';
+  spans1.forEach(span => {
+    const style = span.getAttribute('style') || '';
+    if (style.includes('#e74c3c')) { // Only deletions (red)
+      filteredText1 += span.outerHTML;
+    }
+  });
+
+  const doc2 = parser.parseFromString(comparisonResult.formattedText2, 'text/html');
+  const spans2 = doc2.querySelectorAll('span');
+  let filteredText2 = '';
+  spans2.forEach(span => {
+    const style = span.getAttribute('style') || '';
+    if (style.includes('#2ecc71')) { // Only additions (green)
+      filteredText2 = filteredText2 + span.outerHTML + '\n';
+    }
+  });
+
+  return {
+      ...comparisonResult,
+      formattedText1: comparisonResult.formattedText1OnlyDiffs,
+      formattedText2: comparisonResult.formattedText2OnlyDiffs
+  };
+};
+
+  const getContent = () => {
+    if (lastFocusedTextarea === 'first') {
+      return firstContent;
+    } else if (lastFocusedTextarea === 'second') {
+      return secondContent;
+    }
+    return firstContent;
+  };
+
+  const handleBeautify = () => {
     try {
       const content = getContent();
-      if (!content.trim()) {
-        alert("Content cannot be empty.");
-        return;
-      }
-      downloadZip(content);
+      const beautified = autoBeautify(content);
+      setResults(beautified);
     } catch (error) {
-      setOutput(`Converting ZIP error: ${(error as Error).message}`);
+      alert((error as Error).message);
     }
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
+  const handleValidate = () => {
+    const content = getContent();
+    const result = autoValidate(content);
+    alert(`${result.type}: ${result.message}`);
+  };
+
+  const handleDecrypt = () => {
+    try {
+
+      const content = getContent();
+      backendApiHandler("decrypt", content, true).then((result: string) => {
+        setResults(result);
+      });
+
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  }
+
+  const handleConvert = () => {
+    try {
+      alert("This function is not yet implemented.");
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleEpochConvert = () => {
+    try {
+      const content = getContent();
+      const converted = convertToEpoch(content);
+      setResults(converted);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleDecompressZip = () => {
+    try {
+      const content = getContent();
+      downloadZipFromBase64(content);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleViewPdf = () => {
+    try {
+      const content = getContent();
+      viewPdfFromBase64(content);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleViewHtml = () => {
+    try {
+      const content = getContent();
+      viewHtmlFromBase64(content);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleDecode = () => {
+    try {
+      const content = getContent();
+      const decoded = decodeBase64(content);
+      setResults(decoded);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+
+  const handleEncode = () => {
+    try {
+      const content = getContent();
+      const encoded = encodeBase64(content);
+      setResults(encoded);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+
+  const handleDecodeJwt = () => {
+    try {
+      const content = getContent();
+      const decodedJwt = decodeJwt(content);
+      setResults(decodedJwt);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+  const handleDecodeUuid = () => {
+    try {
+
+      const content = getContent();
+      backendApiHandler("decodeUUID", content, true).then((result: string) => {
+        setResults(result);
+      });
+
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  }
+
+
+  const handleDecodeUrl = () => {
+    try {
+      const content = getContent();
+      const decodedUrl = decodeUrl(content);
+      setResults(decodedUrl);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+  const handleEncodeUrl = () => {
+    try {
+      const content = getContent();
+      const encodedUrl = encodeUrl(content);
+      setResults(encodedUrl);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+
+  const handleClear = () => {
+    setFirstContent('');
+    setSecondContent('');
+    setResults('No results to display.');
+    setComparisonResult(null);
+    setLastFocusedTextarea(null);
   };
 
   return (
-    <div className={`App ${darkMode ? "dark-mode" : ""}`}>
-      <div className="document-page-content">
-        <header className="header-container">
-          {logo != null && (
-            <div className="logo-container">
-              <img src={logo} alt="Logo" className="logo" />
+    <div className="main-page">
+      <div className="grid grid-cols-2">
+        {/* Left Column */}
+        <div className="grid" style={{ gridTemplateColumns: '1fr' }}>
+          <div className={`card ${lastFocusedTextarea === 'first' ? 'card-focused' : ''}`}>
+            <div className="card-header">
+              <h2 className="card-title">First Content</h2>
+              <label className="btn btn-secondary">
+                <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Browse
+                <input
+                  type="file"
+                  accept="*/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFirstFileBrowse}
+                />
+              </label>
             </div>
-          )}
-          <div
-            className="title-container"
-            title="Your all-in-one tool (JSON - XML - EDI - PDF - Base64) and more"
-          >
-            <h1 className="title">DataOps</h1>
-
-          </div>
-        </header>
-
-        <TopNavigation
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-        />
-        <InputContent
-          firstContent={firstContent}
-          secondContent={secondContent}
-          firstFileInputRef={firstFileInputRef}
-          secondFileInputRef={secondFileInputRef}
-          setFirstContent={setFirstContent}
-          setSecondContent={setSecondContent}
-          setFirstFileName={setFirstFileName}
-          setSecondFileName={setSecondFileName}
-          setActiveInput={setActiveInput}
-          expandedTextarea={expandedTextarea}
-          setExpandedTextarea={setExpandedTextarea}
-          firstTextareaRef={firstTextareaRef}
-          secondTextareaRef={secondTextareaRef}
-        />
-
-        <BaseButtons
-          handleGlobal={handleGlobal}
-          handleTextGlobal={handleTextGlobal}
-          handleTextInternally={handleTextInternally}
-          textToReplace={textToReplace}
-          replacementText={replacementText}
-          setTextToReplace={setTextToReplace}
-          setReplacementText={setReplacementText}
-          handleEpoch={handleEpoch}
-          downloadZipFromBase64={downloadZipFromBase64}
-        />
-
-        <Button handleClear={handleClear} handleCompare={handleCompare} />
-
-        <OutputResult output={output} />
-
-        {showDiv && (
-          <div className="xml-compare-container">
-            <ComparasionResult
-              firstComparedOutput={firstComparedOutput}
-              secondComparedOutput={secondComparedOutput}
+            <textarea
+              className={expandedTextarea1 ? "textarea-expanded" : "textarea"}
+              placeholder="Enter First Content (Alt + Z to expand) or drag & drop a file"
+              value={firstContent}
+              onChange={(e) => setFirstContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+                  e.preventDefault();
+                  toggleExpand1();
+                }
+              }}
+              onDrop={handleFirstDrop}
+              onDragOver={handleDragOver}
+              onFocus={() => setLastFocusedTextarea('first')}
             />
+          </div>
+
+          <div className="card">
+            <h3 className="card-subtitle">Encoding & Decoding</h3>
+            <div className="button-grid button-grid-2">
+              <button className="btn btn-outline" onClick={handleDecode}>Decode</button>
+              <button className="btn btn-outline" onClick={handleEncode}>Encode</button>
+              <button className="btn btn-outline" onClick={handleDecodeJwt}>Decode JWT</button>
+              <button className="btn btn-outline" onClick={handleConvert}>Decode UUID</button>
+              <button className="btn btn-outline" onClick={handleDecodeUrl}>Decode URL</button>
+              <button className="btn btn-outline" onClick={handleEncodeUrl}>Encode URL</button>
+              <button className="btn btn-outline" onClick={handleConvert}>Decode EBCDIC</button>
+              <button className="btn btn-outline" onClick={handleConvert}>Encode EBCDIC</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="grid" style={{ gridTemplateColumns: '1fr' }}>
+          <div className={`card ${lastFocusedTextarea === 'second' ? 'card-focused' : ''}`}>
+            <div className="card-header">
+              <h2 className="card-title">Second Content</h2>
+              <label className="btn btn-secondary">
+                <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Browse
+                <input
+                  type="file"
+                  accept="*/*"
+                  style={{ display: 'none' }}
+                  onChange={handleSecondFileBrowse}
+                />
+              </label>
+            </div>
+            <textarea
+              className={expandedTextarea2 ? "textarea-expanded" : "textarea"}
+              placeholder="Enter Second Content (Alt + Z to expand) or drag & drop a file"
+              value={secondContent}
+              onChange={(e) => setSecondContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+                  e.preventDefault();
+                  toggleExpand2();
+                }
+              }}
+              onDrop={handleSecondDrop}
+              onDragOver={handleDragOver}
+              onFocus={() => setLastFocusedTextarea('second')}
+            />
+          </div>
+
+          <div className="card">
+            <h3 className="card-subtitle">Utilities</h3>
+            <div className="button-grid button-grid-2">
+              <button className="btn btn-outline" onClick={handleBeautify}>Beautify</button>
+              <button className="btn btn-outline" onClick={handleConvert}>Decrypt</button>
+              <button className="btn btn-outline" onClick={handleValidate}>Validate</button>
+              <button className="btn btn-outline" onClick={handleConvert}>Convert</button>
+              <button className="btn btn-outline" onClick={handleEpochConvert}>Epoch Converter</button>
+              <button className="btn btn-outline" onClick={handleDecompressZip}>Decompress ZIP</button>
+              <button className="btn btn-outline" onClick={handleViewPdf}>View PDF</button>
+              <button className="btn btn-outline" onClick={handleViewHtml}>View HTML</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="action-bar">
+        <button className="btn btn-primary btn-large" onClick={handleCompare}>Compare</button>
+        <button className="btn btn-secondary btn-large" onClick={handleClear}>Clear</button>
+      </div>
+
+      {/* Results */}
+      <div className="card">
+        <h3 className="card-subtitle">Results</h3>
+
+        {comparisonResult ? (
+          <div className="comparison-results">
+            {/* Action Buttons */}
+            <div className="comparison-actions">
+              <button
+                className="btn btn-outline"
+                onClick={() => setShowOnlyDifferences(!showOnlyDifferences)}
+              >
+                <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                {showOnlyDifferences ? 'Show All' : 'Only Differences'}
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setComparisonResult(null);
+                  setShowOnlyDifferences(false);
+                }}
+              >
+                <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Close Comparison
+              </button>
+            </div>
+
+            {/* Stats Summary */}
+            <div className="comparison-stats">
+              <div className="stat-card stat-similarity">
+                <div className="stat-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{comparisonResult.similarityPercentage}%</div>
+                  <div className="stat-label">Similarity</div>
+                </div>
+              </div>
+
+              <div className="stat-card stat-additions">
+                <div className="stat-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{comparisonResult.additions}</div>
+                  <div className="stat-label">Additions</div>
+                </div>
+              </div>
+
+              <div className="stat-card stat-deletions">
+                <div className="stat-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
+                  </svg>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{comparisonResult.deletions}</div>
+                  <div className="stat-label">Deletions</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Side by Side Comparison */}
+            <div className="comparison-container">
+              <div className="comparison-column">
+                <div className="comparison-header">
+                  <svg className="comparison-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  <span>Original (Deletions in Red)</span>
+                </div>
+                <div
+                  className="comparison-content"
+                  dangerouslySetInnerHTML={{ __html: getFilteredComparison()?.formattedText1 || '' }}
+                />
+              </div>
+
+              <div className="comparison-divider"></div>
+
+              <div className="comparison-column">
+                <div className="comparison-header">
+                  <svg className="comparison-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                  <span>Modified (Additions in Green)</span>
+                </div>
+                <div
+                  className="comparison-content"
+                  dangerouslySetInnerHTML={{ __html: getFilteredComparison()?.formattedText2 || '' }}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <textarea
+              className={expandedResultTextarea ? "textarea-expanded" : "textarea"}
+              readOnly
+              value={results || ""}
+              placeholder="No results to display."
+              onKeyDown={(e) => {
+                if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+                  e.preventDefault();
+                  toggleExpandedResult();
+                }
+              }}
+            />
+            <button className="btn btn-outline" onClick={handleCopyResultToFirstInput} style={{ marginTop: '20px' }}>
+              <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy to First Input Text Content
+            </button>
+
+            <button className="btn btn-outline" onClick={handleCopyResultToSecondInput} style={{ marginTop: '20px', marginLeft: '10px' }}>
+              <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy to Second Input Text Content
+            </button>
+
+            <button className="btn btn-outline" onClick={handleCopyResultToClipboard} style={{ marginTop: '20px', marginLeft: '10px' }}>
+              <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              {isCopied ? "Copied!" : "Copy to clipboard"}
+            </button>
           </div>
         )}
       </div>
-
-      <div className="footer-container">Internally Developed - For Internal Use - Version 2.0</div>
     </div>
   );
 }

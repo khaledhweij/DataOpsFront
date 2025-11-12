@@ -1,272 +1,277 @@
-import "./MainPage.css";
-import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import TextInputContent from "../components/textPage/TextInputContent";
-import TextOutputContent from "../components/textPage/TextOutputContent";
-import logo from "../constants/header-logo.png";
-import TextBaseButtons from "../components/textPage/TextBaseButtons";
-import { postActionRaw } from "../services/apiService";
-import { useContent } from "../hooks/useContent";
-import { JSX } from "react/jsx-runtime";
-import TopNavigation from "../components/TopNavigation";
+// pages/TextTools.tsx
+import { useState } from 'react';
+import './TextTools.css';
 
-type Nullable<T> = T | null;
+export default function TextTools() {
+  const [content, setContent] = useState('');
+  const [findText, setFindText] = useState('');
+  const [replaceText, setReplaceText] = useState('');
+  const [results, setResults] = useState('No results to display.');
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [expandedTextarea, setExpandedTextarea] = useState(false);
+  const [expandedResultTextarea, setExpandedResultTextarea] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const words = content.trim() === "" ? 0 : content.trim().split(/\s+/).length;
+  const chars = content.length;
+  const lines = content ? content.split('\n').length : 0;
 
-export default function MainPage(): JSX.Element {
-  // Content states
-  const [firstContent, setFirstContent] = useState<string>("");
-  const [firstFileName, setFirstFileName] = useState<string>("");
-  const [darkMode, setDarkMode] = useState(false);
+  const escapeRegExp = (str: string) =>
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  // UI / control states
-  const { output, setOutput } = useContent();
-  const firstFileInputRef = useRef<HTMLInputElement>(null);
-  const [activeInput, setActiveInput] = useState<string>("1");
-  const [showDiv, setShowDiv] = useState<boolean>(false);
-  const [firstComparedOutput, setFirstComparedOutput] = useState<string>("");
-  const [textToReplace, setTextToReplace] = useState<string>("");
-  const [replacementText, setReplacementText] = useState<string>("");
-  const [expandedTextarea, setExpandedTextarea] = useState<string | null>(null); // "1" or "2" or null
-  const firstTextareaRef = useRef<Nullable<HTMLTextAreaElement>>(null);
+  const regex = new RegExp(escapeRegExp(findText), "g");
 
-  // --- getContent: keeps selection behavior (Option A)
-  const getContent = (): string => {
-    const textarea = firstTextareaRef.current;
-
-    if (textarea) {
-      const selectionStart = textarea.selectionStart ?? 0;
-      const selectionEnd = textarea.selectionEnd ?? 0;
-
-      if (selectionStart !== selectionEnd) {
-        return textarea.value.substring(selectionStart, selectionEnd);
-      }
-    }
-
-    return firstContent;
+  const toggleExpand = () => {
+    setExpandedTextarea(!expandedTextarea);
   };
 
-  // --- clear
-  const handleClear = () => {
-    setFirstContent("");
-    setFirstFileName("");
-    setOutput("");
-    setShowDiv(false);
-    setFirstComparedOutput("");
-    setTextToReplace("");
-    setReplacementText("");
-
-    if (firstFileInputRef.current) firstFileInputRef.current.value = "";
+  const toggleExpandedResult = () => {
+    setExpandedResultTextarea(!expandedResultTextarea);
   };
 
-  // --- handleText
-  const handleText = (action: string, search: string, replacement: string) => {
-    setOutput("");
+  const handleCursorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCursorPosition(e.target.selectionStart);
+  };
 
-    try {
-      const text = getContent();
-      if (!text.trim()) {
-        alert("Content cannot be empty.");
-        return;
-      }
+  const handleUpperCase = () => {
+    setResults(content.toUpperCase());
+  };
 
-      if (!search) {
-        alert("Pattern to be replaced cannot be empty.");
-        return;
-      }
+  const handleLowerCase = () => {
+    setResults(content.toLowerCase());
+  };
 
-      // Escape regex special characters to make the search literal
-      const escapeRegExp = (str: string) =>
-        str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const handleTitleCase = () => {
+    const result = content.replace(/\w\S*/g, (txt) =>
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+    setResults(result);
+  };
 
-      const regex = new RegExp(escapeRegExp(search), "g");
-      let result = text;
+  const handleNumberLines = () => {
+    const result = content.split('\n').map((line, index) => `${index + 1}- ${line}`).join('\n');
+    setResults(result);
+  };
 
-      switch (action) {
-        case "replaceAll":
-          result = text.replace(regex, replacement);
-          break;
-
-        case "lineBreaksAfter":
-          result = text.replace(regex, `${search}\n`);
-          break;
-
-        case "mergeLinesAfter":
-          result = text.replace(new RegExp(`${escapeRegExp(search)}\\s*\\n`, "g"), `${search} `);
-          break;
-
-        case "removeCharacters":
-          result = text.replace(regex, "");
-          break;
-
-        default:
-          return text;
-      }
-
-      setOutput(result);
-
-    } catch (error) {
-      setOutput(`Error: ${(error as Error).message}`);
+  const handleReplaceAll = () => {
+    if (findText) {
+      const result = content.replace(regex, replaceText);
+      setResults(result);
     }
   };
 
-  const handleLines = (action: string) => {
-    try {
-      const text = getContent();
-      if (!text.trim()) {
-        alert("Content cannot be empty.");
-        return;
-      }
+  const handleLineBreaksAfter = () => {
+    const result = content.replace(regex, findText + '\n');
+    setResults(result);
+  };
 
-      let result = text;
+  const handleMergeLinesBy = () => {
+    const result = content.replaceAll(findText + '\n', findText);
+    setResults(result);
+  };
 
-      switch (action) {
-        case "trimAllLines":
-          result = text
-            .split("\n")
-            .map(line => line.trim())
-            .join("\n");
-          break;
-
-        case "mergeAllLines":
-          result = text.replace(/\s*\n\s*/g, " ");
-          break;
-
-        case "trimEmptyLines":
-          result = text
-            .split("\n")
-            .filter(line => line.trim() !== "")
-            .join("\n");
-          break;
-
-        default:
-          return text;
-      }
-
-    setOutput(result);
-    } catch (error) {
-      setOutput(`Error: ${(error as Error).message}`);
+  const handleRemoveCharacters = () => {
+    if (findText) {
+      const result = content.replace(regex, "");
+      setResults(result);
     }
   };
 
-  const handleTextInternally = (action: String) => {
-    setOutput("");
+  const handleTrimLines = () => {
+    const result = content.split('\n').map(line => line.trim()).join('\n');
+    setResults(result);
+  };
 
-    const textarea = firstTextareaRef.current;
-    const fullText = firstContent;
+  const handleMergeLines = () => {
+    const result = content.split('\n').join(' ');
+    setResults(result);
+  };
 
-    if (!fullText.trim()) {
-      alert("Content cannot be empty.");
-      return;
+  const handleTrimEmptyLines = () => {
+    const result = content.split('\n').filter(line => line.trim()).join('\n');
+    setResults(result);
+  };
+
+  const handleFileBrowse = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        setContent(content);
+      };
+      reader.readAsText(file);
     }
+  };
 
-    let selectionStart = 0;
-    let selectionEnd = 0;
-
-    if (textarea) {
-      selectionStart = textarea.selectionStart ?? 0;
-      selectionEnd = textarea.selectionEnd ?? 0;
-    }
-
-    const hasSelection = selectionStart !== selectionEnd;
-
-    const applyTransform = (input: string) => {
-      switch (action) {
-        case "upperCase":
-          return input.toUpperCase();
-        case "lowerCase":
-          return input.toLowerCase();
-        case "titleCase":
-          return input
-            .toLowerCase()
-            .split(" ")
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-        case "sentenceCase":
-          return input
-            .split("\n")
-            .map(line => line.charAt(0).toUpperCase() + line.slice(1))
-            .join("\n");
-
-        default:
-          return input;
-      }
+  const readFileContent = (file: File, callback: (content: string) => void) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      callback(content);
     };
+    reader.readAsText(file);
+  };
 
-    if (hasSelection) {
-      const before = fullText.substring(0, selectionStart);
-      const selected = fullText.substring(selectionStart, selectionEnd);
-      const after = fullText.substring(selectionEnd);
-      const transformed = applyTransform(selected);
-      const newText = before + transformed + after;
-
-      setOutput(newText);
-
-      requestAnimationFrame(() => {
-        if (textarea) {
-          textarea.selectionStart = selectionStart;
-          textarea.selectionEnd = selectionStart + transformed.length;
-        }
-      });
-    } else {
-      const transformed = applyTransform(fullText);
-      setOutput(transformed);
+  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      readFileContent(file, setContent);
     }
   };
 
-  const copyOutputToInput = () => {
-    setFirstContent(output);
-  }
+  const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCopyResultToInput = () => {
+    setContent(results);
+  };
+
+  const handleCopyResultToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(results);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 1000); // hide after 1s
+    } catch (err) {
+    }
+  };
+
+  const handleClear = () => {
+    setContent('');
+    setResults('No results to display.');
+    setFindText('');
+    setReplaceText('');
+    setCursorPosition(0)
+  };
 
   return (
-    <div className={`App ${darkMode ? "dark-mode" : ""}`}>
-      <div className="document-page-content">
-        <header className="header-container">
-          {logo != null && (
-            <div className="logo-container">
-              <img src={logo} alt="Logo" className="logo" />
-            </div>
-          )}
-          <div
-            className="title-container"
-            title="Your all-in-one tool (Texts) and more"
-          >
-            <h1 className="title">DataOps</h1>
-
-          </div>
-        </header>
-
-        <TopNavigation
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
+    <div className="text-tools">
+      <div className="card mb-3">
+        <div className="card-header">
+          <h2 className="card-title">Text Content</h2>
+          <label className="btn btn-secondary">
+            <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            Browse
+            <input
+              type="file"
+              accept="*/*"
+              style={{ display: 'none' }}
+              onChange={handleFileBrowse}
+            />
+          </label>
+        </div>
+        <textarea
+          className={expandedTextarea ? "textarea-expanded" : "textarea"}
+          style={{ minHeight: '350px' }}
+          placeholder="Enter Content (Alt + Z to expand)"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onSelect={handleCursorChange}
+          onKeyDown={(e) => {
+            if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+              e.preventDefault();
+              toggleExpand();
+            }
+          }}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
         />
+        <div className="stats">
+          <small>
+            📝 {words} words | {chars} chars | Cursor at {cursorPosition} | {lines} Lines
 
-        <TextInputContent
-          firstContent={firstContent}
-          firstFileInputRef={firstFileInputRef}
-          setFirstContent={setFirstContent}
-          setFirstFileName={setFirstFileName}
-          setActiveInput={setActiveInput}
-          expandedTextarea={expandedTextarea}
-          setExpandedTextarea={setExpandedTextarea}
-          firstTextareaRef={firstTextareaRef}
-        />
-
-        <TextBaseButtons
-          handleText={handleText}
-          handleTextInternally={handleTextInternally}
-          handleLines={handleLines}
-          textToReplace={textToReplace}
-          replacementText={replacementText}
-          setTextToReplace={setTextToReplace}
-          setReplacementText={setReplacementText}
-          handleClear={handleClear}
-        />
-
-        <TextOutputContent output={output} copyOutputToInput={copyOutputToInput}/>
-
+          </small>
+        </div>
       </div>
 
-      <div className="footer-container">Internally Developed - For Internal Use - Version 2.0</div>
+      <div className="grid grid-3 mb-3">
+        <div className="card">
+          <h3 className="card-subtitle">Case Operations</h3>
+          <div className="button-grid">
+            <button className="btn btn-outline" onClick={handleUpperCase}>UPPERCASE</button>
+            <button className="btn btn-outline" onClick={handleLowerCase}>lowercase</button>
+            <button className="btn btn-outline" onClick={handleTitleCase}>TitleCase</button>
+            <button className="btn btn-outline" onClick={handleNumberLines}>Number the Lines</button>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="card-subtitle">Text Manipulation</h3>
+          <div className="button-grid">
+            <button className="btn btn-outline" onClick={handleReplaceAll}>Replace All</button>
+            <button className="btn btn-outline" onClick={handleLineBreaksAfter}>Line Breaks After</button>
+            <button className="btn btn-outline" onClick={handleMergeLinesBy}>Merge Lines By</button>
+            <button className="btn btn-outline" onClick={handleRemoveCharacters}>Remove Characters</button>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="card-subtitle">Line Operations</h3>
+          <div className="button-grid">
+            <button className="btn btn-outline" onClick={handleTrimLines}>Trim All Lines</button>
+            <button className="btn btn-outline" onClick={handleMergeLines}>Merge All Lines</button>
+            <button className="btn btn-outline" onClick={handleTrimEmptyLines}>Trim Empty Lines</button>
+            <button className="btn btn-primary" onClick={handleClear}>Clear All</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="card mb-3">
+        <h3 className="card-subtitle">Find & Replace</h3>
+        <div className="find-replace">
+          <input
+            type="text"
+            className="input"
+            placeholder="pattern to be replaced..."
+            value={findText}
+            onChange={(e) => setFindText(e.target.value)}
+          />
+          <input
+            type="text"
+            className="input"
+            placeholder="replacement pattern..."
+            value={replaceText}
+            onChange={(e) => setReplaceText(e.target.value)}
+          />
+        </div>
+      </div>
+
+
+      <div className="card">
+        <h3 className="card-subtitle">Results</h3>
+        <textarea
+          className={expandedResultTextarea ? "textarea-expanded" : "textarea"}
+          readOnly
+          value={results || ""}
+          placeholder="No results to display."
+          onKeyDown={(e) => {
+            if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+              e.preventDefault();
+              toggleExpandedResult();
+            }
+          }}
+        />
+        <button className="btn btn-outline" onClick={handleCopyResultToInput} style={{ marginTop: '20px' }}>
+          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          Copy to Input Text Content
+        </button>
+
+        <button className="btn btn-outline" onClick={handleCopyResultToClipboard} style={{ marginTop: '20px', marginLeft: '10px' }}>
+          <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          {isCopied ? "Copied!" : "Copy to clipboard"}
+        </button>
+      </div>
+
+      <div className="footer-container">Internally Developed - For Internal Use - Version 3.0</div>
     </div>
   );
 }
