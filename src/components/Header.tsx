@@ -49,14 +49,16 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
       <div className="header-container">
         <div className="header-top">
 
+          <div className="logo-container">
+            <img src={logo} alt="Logo" className="logo" />
+          </div>
+          
           <div className="logo-section">
             <div>
               <span className="header-text">DataOps</span>
             </div>
           </div>
-          <div className="logo-container">
-            <img src={logo} alt="Logo" className="logo" />
-          </div>
+
           <div className="header-controls">
             <button
               className="icon-button"
