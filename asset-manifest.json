@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/static/css/main.9a12adc6.css",
-    "main.js": "/static/js/main.8c547e09.js",
+    "main.css": "/static/css/main.fe7001df.css",
+    "main.js": "/static/js/main.17794644.js",
     "static/js/453.8efb9bde.chunk.js": "/static/js/453.8efb9bde.chunk.js",
     "static/media/DataOpsLogo.png": "/static/media/DataOpsLogo.335a0b43d11cb157f8b4.png",
     "static/media/DataOpsLogo_dark.png": "/static/media/DataOpsLogo_dark.02ba1b5ffff34b65d93f.png",
     "index.html": "/index.html",
-    "main.9a12adc6.css.map": "/static/css/main.9a12adc6.css.map",
-    "main.8c547e09.js.map": "/static/js/main.8c547e09.js.map",
+    "main.fe7001df.css.map": "/static/css/main.fe7001df.css.map",
+    "main.17794644.js.map": "/static/js/main.17794644.js.map",
     "453.8efb9bde.chunk.js.map": "/static/js/453.8efb9bde.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9a12adc6.css",
-    "static/js/main.8c547e09.js"
+    "static/css/main.fe7001df.css",
+    "static/js/main.17794644.js"
   ]
 }
