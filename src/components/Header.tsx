@@ -16,6 +16,35 @@ interface HeaderProps {
 export default function Header({ activeTab, onTabChange, showAbout, onToggleAbout }: HeaderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [logo, setLogo] = useState<typeof lightLogo | typeof darkLogo>(lightLogo);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    // Only apply on mobile
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 50) {
+        // Always show when near top
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        // Scrolling down - hide
+        setIsVisible(false);
+      } else {
+        // Scrolling up - show
+        setIsVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'light';
@@ -45,7 +74,7 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
   ];
 
   return (
-    <header className="header">
+    <header className={`header ${!isVisible ? 'header-hidden' : ''}`}>
       <div className="header-container">
         <div className="header-top">
 

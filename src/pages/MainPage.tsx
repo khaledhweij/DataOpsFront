@@ -561,6 +561,7 @@ const getFilteredComparison = () => {
           </div>
         )}
       </div>
+      <div className="footer-container">Open Source - Licensed under MIT License - Version 1.0</div>
     </div>
   );
 }
