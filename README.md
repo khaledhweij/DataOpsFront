@@ -21,7 +21,7 @@ DataOps is your all-in-one open source platform for handling, transforming, and 
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/dataops-app.git
+git clone https://github.com/khaledhweij/DataOpsFront.git
 
 # Navigate to project
 cd dataops-app
@@ -57,8 +57,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**[Your Name]**
-- GitHub: [@yourusername](https://github.com/yourusername)
+**[Khaled Hweij]**
+- GitHub: [@khaledhweij](https://github.com/khaledhweij)
 
 ## ⭐ Show Your Support
 
