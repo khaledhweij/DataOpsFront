@@ -271,7 +271,7 @@ export default function TextTools() {
         </button>
       </div>
 
-      <div className="footer-container">Internally Developed - For Internal Use - Version 3.0</div>
+      <div className="footer-container">Open Source - Licensed under MIT License - Version 1.0</div>
     </div>
   );
 }

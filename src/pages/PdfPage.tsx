@@ -239,19 +239,34 @@ export default function PdfTools() {
             <input
               type="number"
               className="input-number"
-              value={fromPage}
+              value={fromPage === 0 ? '' : fromPage}
               min="1"
-              onChange={(e) => setFromPage(parseInt(e.target.value) || 1)}
+              placeholder="1"
+              onChange={(e) => {
+                const value = e.target.value;
+                const newFromPage = value === '' ? 0 : parseInt(value) || 0;
+                setFromPage(newFromPage);
+
+                // Auto-update toPage only if it's less than fromPage + 1
+                if (newFromPage > 0 && toPage > 0 && toPage <= newFromPage) {
+                  setToPage(newFromPage + 1);
+                }
+              }}
             />
           </div>
+
           <div className="form-group">
             <label className="form-label">To Page</label>
             <input
               type="number"
               className="input-number"
-              value={toPage}
-              min="1"
-              onChange={(e) => setToPage(parseInt(e.target.value) || 1)}
+              value={toPage === 0 ? '' : toPage}
+              min={fromPage > 0 ? fromPage + 1 : 1}
+              placeholder={fromPage > 0 ? String(fromPage + 1) : "1"}
+              onChange={(e) => {
+                const value = e.target.value;
+                setToPage(value === '' ? 0 : parseInt(value) || 0);
+              }}
             />
           </div>
         </div>
@@ -291,7 +306,7 @@ export default function PdfTools() {
         )}
       </div>
 
-      <div className="footer-container">Internally Developed - For Internal Use - Version 3.0</div>
+      <div className="footer-container">Open Source - Licensed under MIT License - Version 1.0</div>
     </div>
   );
 }

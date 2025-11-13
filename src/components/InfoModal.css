@@ -1,5 +1,5 @@
 /* Overlay with blur */
-.modal-overlay {
+/* .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -14,7 +14,14 @@
   animation: fadeIn 0.1s ease-in-out;
 }
 
-/* Center popup */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-start; 
+    padding-top: 2rem;
+  }
+} 
+
 .modal-box {
   background: var(--bg-card);
   padding: 25px 35px;
@@ -25,6 +32,53 @@
   border: 1px solid var(--border-color);
 
   animation: fadeIn 0.25s ease-out;
+}*/
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(6px);
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0s ease-in-out;
+  padding: 1rem; /* Add padding */
+}
+
+/* Center popup */
+.modal-box {
+  background: var(--bg-card);
+  padding: 25px 35px;
+  border-radius: 10px;
+  width: 600px;
+  max-width: 80%;
+  text-align: start;
+  border: 1px solid var(--border-color);
+  animation: fadeIn 0.1s ease-out;
+  max-height: 90vh;
+  overflow-y: auto; 
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-start; 
+    padding-top: 2rem;
+  }
+
+  .modal-box {
+    max-width: 80%;
+    width: 80%;
+    padding: 20px;
+    max-height: calc(100vh - 5rem); 
+    margin: auto 0; 
+  }
 }
 
 .close-modal-btn {
