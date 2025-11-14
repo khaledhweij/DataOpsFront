@@ -15,11 +15,12 @@
   .header {
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
   }
-  
+
   .header.header-hidden {
     transform: translateY(-100%);
     opacity: 0;
   }
+
 }
 
 .header-container {
@@ -38,7 +39,7 @@
 .logo {
   width: 100%;
   height: auto;
-  
+
 }
 
 .logo-container {
@@ -72,7 +73,7 @@
 .logo-section {
   display: flex;
   align-items: center;
-  
+
 }
 
 .header-text {
@@ -172,6 +173,7 @@
     opacity: 0;
     transform: scaleX(0);
   }
+
   to {
     opacity: 1;
     transform: scaleX(1);
@@ -181,7 +183,11 @@
 /* Responsive */
 @media (max-width: 768px) {
   .header-container {
-    padding: 1rem;
+    padding: 1rem 2rem;
+  }
+
+  .tab-nav {
+    padding: 0 1rem;
   }
 
   .header-top {

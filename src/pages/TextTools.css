@@ -30,9 +30,7 @@
   min-height: 300px;
   max-height: 300px;
   display: flex;
-  align-items: center;
-  justify-content: start;
-  color: var(--text-tertiary);
+  color: var(--text-primary);
   font-size: 0.875rem;
   background: var(--bg-input);
   border-radius: 0.75rem;

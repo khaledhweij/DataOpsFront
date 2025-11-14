@@ -61,7 +61,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
           <p>
             <strong>Khaled Hweij</strong> (
             <a
-              href="https://github.com/khaledhweij"
+              href="https://www.linkedin.com/in/khaledhweij/"
               target="_blank"
               rel="noopener noreferrer"
               className="modal-link"
