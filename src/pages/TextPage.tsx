@@ -204,9 +204,9 @@ export default function TextTools() {
           <h3 className="card-subtitle">Text Manipulation</h3>
           <div className="button-grid">
             <button className="btn btn-outline" onClick={handleReplaceAll}>Replace All</button>
-            <button className="btn btn-outline" onClick={handleLineBreaksAfter}>Line Breaks After</button>
-            <button className="btn btn-outline" onClick={handleMergeLinesBy}>Merge Lines By</button>
-            <button className="btn btn-outline" onClick={handleRemoveCharacters}>Remove Characters</button>
+            <button className="btn btn-outline" onClick={handleLineBreaksAfter} title="Please fill the pattern to be replaced below">Line Breaks After</button>
+            <button className="btn btn-outline" onClick={handleMergeLinesBy} title="Please fill the pattern to be replaced below">Merge Lines By</button>
+            <button className="btn btn-outline" onClick={handleRemoveCharacters} title="Please fill the pattern to be replaced below">Remove Characters</button>
           </div>
         </div>
 
