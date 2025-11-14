@@ -24,7 +24,7 @@ DataOps is your all-in-one open source platform for handling, transforming, and 
 git clone https://github.com/khaledhweij/DataOpsFront.git
 
 # Navigate to project
-cd dataops-app
+cd DataOpsFront
 
 # Install dependencies
 npm install
@@ -59,6 +59,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **[Khaled Hweij]**
 - GitHub: [@khaledhweij](https://github.com/khaledhweij)
+- Linkedin: [@khaledhweij](https://www.linkedin.com/in/khaledhweij/)
 
 ## ⭐ Show Your Support
 

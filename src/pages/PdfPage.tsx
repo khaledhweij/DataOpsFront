@@ -42,7 +42,7 @@ export default function PdfTools() {
   };
 
   const handleConvert = () => {
-    alert("Under development — please use SharePoint for now.");
+    alert("Coming soon!");
   }
 
   const handleMerge = async () => {

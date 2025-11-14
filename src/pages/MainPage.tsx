@@ -17,7 +17,7 @@ export default function NewMainPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [lastFocusedTextarea, setLastFocusedTextarea] = useState<'first' | 'second' | null>(null);
   const [showOnlyDifferences, setShowOnlyDifferences] = useState(false);
-  
+
   const comparator = new TextComparator();
 
   const toggleExpand1 = () => {
@@ -118,38 +118,38 @@ export default function NewMainPage() {
     }
   };
 
-const getFilteredComparison = () => {
-  if (!comparisonResult || !showOnlyDifferences) return comparisonResult;
+  const getFilteredComparison = () => {
+    if (!comparisonResult || !showOnlyDifferences) return comparisonResult;
 
-  // Extract only the colored parts (removed/added), skip unchanged (var(--text-tertiary))
-  const parser = new DOMParser();
-  
-  const doc1 = parser.parseFromString(comparisonResult.formattedText1, 'text/html');
-  const spans1 = doc1.querySelectorAll('span');
-  let filteredText1 = '';
-  spans1.forEach(span => {
-    const style = span.getAttribute('style') || '';
-    if (style.includes('#e74c3c')) { // Only deletions (red)
-      filteredText1 += span.outerHTML;
-    }
-  });
+    // Extract only the colored parts (removed/added), skip unchanged (var(--text-tertiary))
+    const parser = new DOMParser();
 
-  const doc2 = parser.parseFromString(comparisonResult.formattedText2, 'text/html');
-  const spans2 = doc2.querySelectorAll('span');
-  let filteredText2 = '';
-  spans2.forEach(span => {
-    const style = span.getAttribute('style') || '';
-    if (style.includes('#2ecc71')) { // Only additions (green)
-      filteredText2 = filteredText2 + span.outerHTML + '\n';
-    }
-  });
+    const doc1 = parser.parseFromString(comparisonResult.formattedText1, 'text/html');
+    const spans1 = doc1.querySelectorAll('span');
+    let filteredText1 = '';
+    spans1.forEach(span => {
+      const style = span.getAttribute('style') || '';
+      if (style.includes('#e74c3c')) { // Only deletions (red)
+        filteredText1 += span.outerHTML;
+      }
+    });
 
-  return {
+    const doc2 = parser.parseFromString(comparisonResult.formattedText2, 'text/html');
+    const spans2 = doc2.querySelectorAll('span');
+    let filteredText2 = '';
+    spans2.forEach(span => {
+      const style = span.getAttribute('style') || '';
+      if (style.includes('#2ecc71')) { // Only additions (green)
+        filteredText2 = filteredText2 + span.outerHTML + '\n';
+      }
+    });
+
+    return {
       ...comparisonResult,
       formattedText1: comparisonResult.formattedText1OnlyDiffs,
       formattedText2: comparisonResult.formattedText2OnlyDiffs
+    };
   };
-};
 
   const getContent = () => {
     if (lastFocusedTextarea === 'first') {
@@ -191,7 +191,7 @@ const getFilteredComparison = () => {
 
   const handleConvert = () => {
     try {
-      alert("This function is not yet implemented.");
+      alert("Coming soon!");
     } catch (error) {
       alert((error as Error).message);
     }
@@ -210,7 +210,11 @@ const getFilteredComparison = () => {
   const handleDecompressZip = () => {
     try {
       const content = getContent();
-      downloadZipFromBase64(content);
+      if (content.trim() === "") {
+        setResults("Content cannot be empty");
+      } else {
+        downloadZipFromBase64(content);
+      }
     } catch (error) {
       alert((error as Error).message);
     }
@@ -219,7 +223,12 @@ const getFilteredComparison = () => {
   const handleViewPdf = () => {
     try {
       const content = getContent();
-      viewPdfFromBase64(content);
+      if (content.trim() === "") {
+        setResults("Content cannot be empty");
+      } else {
+        viewPdfFromBase64(content);
+      }
+
     } catch (error) {
       alert((error as Error).message);
     }
@@ -228,7 +237,11 @@ const getFilteredComparison = () => {
   const handleViewHtml = () => {
     try {
       const content = getContent();
-      viewHtmlFromBase64(content);
+      if (content.trim() === "") {
+        setResults("Content cannot be empty");
+      } else {
+        viewHtmlFromBase64(content);
+      }
     } catch (error) {
       alert((error as Error).message);
     }
@@ -354,9 +367,9 @@ const getFilteredComparison = () => {
           <div className="card">
             <h3 className="card-subtitle">Encoding & Decoding</h3>
             <div className="button-grid button-grid-2">
-              <button className="btn btn-outline" onClick={handleDecode}>Decode</button>
-              <button className="btn btn-outline" onClick={handleEncode}>Encode</button>
-              <button className="btn btn-outline" onClick={handleDecodeJwt}>Decode JWT</button>
+              <button className="btn btn-outline" onClick={handleDecode} title="Decode Base64">Decode</button>
+              <button className="btn btn-outline" onClick={handleEncode} title="Encode Base64">Encode</button>
+              <button className="btn btn-outline" onClick={handleDecodeJwt} >Decode JWT</button>
               <button className="btn btn-outline" onClick={handleConvert}>Decode UUID</button>
               <button className="btn btn-outline" onClick={handleDecodeUrl}>Decode URL</button>
               <button className="btn btn-outline" onClick={handleEncodeUrl}>Encode URL</button>
@@ -404,14 +417,14 @@ const getFilteredComparison = () => {
           <div className="card">
             <h3 className="card-subtitle">Utilities</h3>
             <div className="button-grid button-grid-2">
-              <button className="btn btn-outline" onClick={handleBeautify}>Beautify</button>
+              <button className="btn btn-outline" onClick={handleBeautify} title="XML, JSON, StackTrace">Beautify</button>
               <button className="btn btn-outline" onClick={handleConvert}>Decrypt</button>
               <button className="btn btn-outline" onClick={handleValidate}>Validate</button>
               <button className="btn btn-outline" onClick={handleConvert}>Convert</button>
               <button className="btn btn-outline" onClick={handleEpochConvert}>Epoch Converter</button>
-              <button className="btn btn-outline" onClick={handleDecompressZip}>Decompress ZIP</button>
-              <button className="btn btn-outline" onClick={handleViewPdf}>View PDF</button>
-              <button className="btn btn-outline" onClick={handleViewHtml}>View HTML</button>
+              <button className="btn btn-outline" onClick={handleDecompressZip} title="Base64 ZIP">Decompress ZIP</button>
+              <button className="btn btn-outline" onClick={handleViewPdf} title="Base64 PDF">View PDF</button>
+              <button className="btn btn-outline" onClick={handleViewHtml} title="Base64 HTML">View HTML</button>
             </div>
           </div>
         </div>
@@ -538,7 +551,7 @@ const getFilteredComparison = () => {
                 }
               }}
             />
-            <button className="btn btn-outline" onClick={handleCopyResultToFirstInput} style={{ marginTop: '20px', marginLeft: '10px'  }}>
+            <button className="btn btn-outline" onClick={handleCopyResultToFirstInput} style={{ marginTop: '20px', marginLeft: '10px' }}>
               <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
