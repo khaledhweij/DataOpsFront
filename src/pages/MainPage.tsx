@@ -1,7 +1,7 @@
 // pages/NewMainPage.tsx
 import { useState } from 'react';
 import './MainPage.css';
-import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, decodeUuid, encodeBase64, encodeUrl } from '../functions/MainUtils';
+import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, convertJsonOrToon, encodeBase64, encodeUrl } from '../functions/MainUtils';
 import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from '../services/fileService';
 import { convertToEpoch } from '../services/dateService';
 import TextComparator, { ComparisonResult } from '../functions/TextComparator';
@@ -189,9 +189,19 @@ export default function NewMainPage() {
     }
   }
 
-  const handleConvert = () => {
+  const handleComingSoon = () => {
     try {
       alert("Coming soon!");
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+  const handleToonJson = () => {
+    try {
+      const content = getContent();
+      const output = convertJsonOrToon(content);
+      setResults(output);
     } catch (error) {
       alert((error as Error).message);
     }
@@ -370,11 +380,11 @@ export default function NewMainPage() {
               <button className="btn btn-outline" onClick={handleDecode} title="Decode Base64">Decode</button>
               <button className="btn btn-outline" onClick={handleEncode} title="Encode Base64">Encode</button>
               <button className="btn btn-outline" onClick={handleDecodeJwt} >Decode JWT</button>
-              <button className="btn btn-outline" onClick={handleConvert}>Decode UUID</button>
+              <button className="btn btn-outline" onClick={handleComingSoon}>Decode UUID</button>
               <button className="btn btn-outline" onClick={handleDecodeUrl}>Decode URL</button>
               <button className="btn btn-outline" onClick={handleEncodeUrl}>Encode URL</button>
-              <button className="btn btn-outline" onClick={handleConvert}>Decode EBCDIC</button>
-              <button className="btn btn-outline" onClick={handleConvert}>Encode EBCDIC</button>
+              <button className="btn btn-outline" onClick={handleComingSoon}>Decode EBCDIC</button>
+              <button className="btn btn-outline" onClick={handleComingSoon}>Encode EBCDIC</button>
             </div>
           </div>
         </div>
@@ -418,9 +428,9 @@ export default function NewMainPage() {
             <h3 className="card-subtitle">Utilities</h3>
             <div className="button-grid button-grid-2">
               <button className="btn btn-outline" onClick={handleBeautify} title="XML, JSON, StackTrace">Beautify</button>
-              <button className="btn btn-outline" onClick={handleConvert}>Decrypt</button>
+              <button className="btn btn-outline" onClick={handleComingSoon}>Decrypt</button>
               <button className="btn btn-outline" onClick={handleValidate}>Validate</button>
-              <button className="btn btn-outline" onClick={handleConvert}>Convert</button>
+              <button className="btn btn-outline" onClick={handleToonJson}>TOON - JSON</button>
               <button className="btn btn-outline" onClick={handleEpochConvert}>Epoch Converter</button>
               <button className="btn btn-outline" onClick={handleDecompressZip} title="Base64 ZIP">Decompress ZIP</button>
               <button className="btn btn-outline" onClick={handleViewPdf} title="Base64 PDF">View PDF</button>
