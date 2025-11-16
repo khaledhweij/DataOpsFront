@@ -1,4 +1,3 @@
-// components/Header.tsx
 import { useState, useEffect } from 'react';
 import './Header.css';
 import lightLogo from "../assets/DataOpsLogo.png"
@@ -20,7 +19,6 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
-    // Only apply on mobile
     const isMobile = window.innerWidth <= 768;
     if (!isMobile) return;
 
@@ -28,13 +26,10 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
       const currentScrollY = window.scrollY;
 
       if (currentScrollY < 50) {
-        // Always show when near top
         setIsVisible(true);
       } else if (currentScrollY > lastScrollY) {
-        // Scrolling down - hide
         setIsVisible(false);
       } else {
-        // Scrolling up - show
         setIsVisible(true);
       }
 

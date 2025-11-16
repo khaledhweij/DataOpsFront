@@ -1,7 +1,5 @@
 import { postActionRaw } from "../services/apiService";
-import { convertToEpoch } from "../services/dateService";
-import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from "../services/fileService";
-import TextComparator from "./TextComparator";
+import { encode, decode } from "@toon-format/toon";
 
 export const backendApiHandler = async (
   action: string,
@@ -45,23 +43,22 @@ export const autoBeautify = (content: string): string => {
   }
 
     const stackTracePatterns = [
-    /at\s+[\w$.]+\s*\([^)]*\)/m,  // Java/JavaScript: at function (file:line)
-    /^\s*at\s+/m,                  // Generic "at " pattern
-    /\w+Exception:/m,               // Java exceptions
-    /Error:\s*\n\s+at\s+/m,        // JavaScript Error with stack
-    /^\s*\d+\s+[^\s]+\s+0x[0-9a-f]+/m, // Native stack traces
+    /at\s+[\w$.]+\s*\([^)]*\)/m, 
+    /^\s*at\s+/m,                  
+    /\w+Exception:/m,               
+    /Error:\s*\n\s+at\s+/m,        
+    /^\s*\d+\s+[^\s]+\s+0x[0-9a-f]+/m, 
   ];
   
   if (isStackTrace(trimmed)) {
     return beautifyStackTrace(trimmed);
   }
   
-  // Check for EDIFACT (contains ' as segment terminator)
+  // Check for EDIFACT
   if (trimmed.includes("'") && (trimmed.startsWith('UNB') || trimmed.startsWith('UNA') || trimmed.includes('UNH'))) {
     return beautifyEdifact(trimmed);
   }
   
-  // Try JSON first (most common)
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     try {
       const parsed = JSON.parse(trimmed);
@@ -71,7 +68,6 @@ export const autoBeautify = (content: string): string => {
     }
   }
   
-  // Try XML
   if (trimmed.startsWith('<')) {
     try {
       const parser = new DOMParser();
@@ -85,7 +81,6 @@ export const autoBeautify = (content: string): string => {
     }
   }
   
-  // Return as-is if nothing matches
   return trimmed;
 };
 
@@ -147,13 +142,11 @@ export const autoValidate = (content: string): { isValid: boolean; type: string;
     }
   }
   
-  // Plain text
   return { isValid: true, type: 'Text', message: 'Plain text content' };
 };
 
 // ===== EDIFACT =====
 const beautifyEdifact = (edifact: string): string => {
-  // Break line after each ' (segment terminator)
   return edifact.replace(/'/g, "'\n");
 };
 
@@ -267,13 +260,31 @@ export const decodeUrl = (str: string): string => {
 };
 
 export const encodeBase64 = (str: string): string => {
-  return btoa(unescape(encodeURIComponent(str))); // Handle UTF-8
+  return btoa(unescape(encodeURIComponent(str)));
 };
 
 export const decodeBase64 = (str: string): string => {
   try {
-    return decodeURIComponent(escape(atob(str))); // Handle UTF-8
+    return decodeURIComponent(escape(atob(str)));
   } catch {
     throw new Error('Invalid Base64 string');
   }
 };
+
+export function convertJsonOrToon(input: string): string {
+  try {
+    const parsed = JSON.parse(input);
+    return encode(parsed, {  });
+  } catch (_) {
+    // Not JSON → try TOON
+  }
+
+  try {
+    const parsed = decode(input);
+    return JSON.stringify(parsed, null, 2);
+  } catch (_) {
+    // Not TOON either
+  }
+
+  return "Input is neither valid JSON nor valid TOON format.";
+}

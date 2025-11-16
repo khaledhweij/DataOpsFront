@@ -1,6 +1,6 @@
 # DataOps - Open Source Data Transformation Platform
 
-DataOps is your all-in-one open source platform for handling, transforming, and analyzing data securely — without ever exposing sensitive information to third-party tools or websites.
+DataOps is your all-in-one open source platform for handling, transforming, and analyzing data securely - without ever exposing sensitive information to third-party tools or websites.
 
 🔗 **Live Demo:** [dataopsapp.com](https://dataopsapp.com)
 

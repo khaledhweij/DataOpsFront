@@ -16,13 +16,13 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
 
         <p>
           <strong>DataOps</strong> is your all-in-one open source platform for handling, transforming,
-          and analyzing data securely — without ever exposing sensitive information to third-party tools or websites.
+          and analyzing data securely - without ever exposing sensitive information to third-party tools or websites.
         </p>
 
 
         <p>
           It supports a wide range of data and document types including{" "}
-          <strong>JSON, XML, EDI (Edifact), Base64, plain text, and PDF</strong>, providing a powerful suite
+          <strong>JSON, XML, EDI (Edifact), TOON, Base64, plain text, and PDF</strong>, providing a powerful suite
           of operations designed for developers and analysts alike.
         </p>
 
@@ -30,7 +30,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
           <h2 className="text-xl font-semibold mb-2">Key Features</h2>
           <ul className="list-disc list-inside space-y-1">
             <li>
-              <strong>Compare & Validate:</strong>  Compare JSON, XML, EDI, and text contents with
+              <strong>Compare & Validate:</strong>  Compare JSON, XML, TOON, EDI, and text contents with
               highlighted differences and similarity scores.
             </li>
             <li>
@@ -43,10 +43,10 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
             </li>
             <li>
               <strong>PDF Tools:</strong> Merge, split, extract pages, and manipulate
-              PDF files — all securely in your browser.
+              PDF files - all securely in your browser.
             </li>
             <li>
-              <strong>Privacy First:</strong> 100% client-side processing — no server uploads,
+              <strong>Privacy First:</strong> 100% client-side processing - no server uploads,
               no external APIs, no data leaves your device.
             </li>
             <li>
@@ -81,7 +81,17 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
               github.com/khaledhweij/DataOpsFront
             </a>
           </p>
-
+          <p>
+            Any feedback or suggestions?{' '}
+            <a
+              href="mailto:khaledhweij@gmail.com?subject=DataOps%20Feedback"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="modal-link"
+            >
+              Send Feedback
+            </a>
+          </p>
           <p className="modal-footer">
             Licensed under{' '}
             <a
