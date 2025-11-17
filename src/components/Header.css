@@ -129,6 +129,38 @@
   border-bottom: 2px solid var(--border-color);
   margin: 0 -2rem;
   padding: 0 2rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fade effect on scroll */
+.tab-nav-container::before,
+.tab-nav-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 2px;
+  width: 30px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tab-nav-container::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-card), transparent);
+}
+
+.tab-nav-container::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-card), transparent);
 }
 
 .tab-button {
@@ -143,6 +175,7 @@
   transition: all var(--transition-fast);
   position: relative;
   margin-bottom: -2px;
+  white-space: nowrap;
 }
 
 .tab-button:hover {
@@ -190,6 +223,11 @@
     padding: 0 1rem;
   }
 
+  .tab-nav-container::before,
+  .tab-nav-container::after {
+    display: block;
+  }
+
   .header-top {
     margin-bottom: 1rem;
   }
@@ -200,5 +238,14 @@
 
   .subtitle {
     display: none;
+  }
+}
+
+@media (min-width: 769px) {
+
+  .tab-nav-container::before,
+  .tab-nav-container::after {
+    display: none;
+    /* Hide fade on desktop */
   }
 }
