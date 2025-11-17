@@ -46,6 +46,10 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
               PDF files - all securely in your browser.
             </li>
             <li>
+              <strong>API Tester:</strong> Run basic HTTP requests (including cURL commands!) 
+              directly from the browser.
+            </li>
+            <li>
               <strong>Privacy First:</strong> 100% client-side processing - no server uploads,
               no external APIs, no data leaves your device.
             </li>
