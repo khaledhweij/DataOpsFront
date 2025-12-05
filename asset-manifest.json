@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/static/css/main.7d9a7474.css",
-    "main.js": "/static/js/main.1b5171ce.js",
+    "main.css": "/static/css/main.4a1fb73c.css",
+    "main.js": "/static/js/main.35796e74.js",
     "static/js/453.8efb9bde.chunk.js": "/static/js/453.8efb9bde.chunk.js",
-    "static/media/DataOpsLogo.png": "/static/media/DataOpsLogo.335a0b43d11cb157f8b4.png",
-    "static/media/DataOpsLogo_dark.png": "/static/media/DataOpsLogo_dark.02ba1b5ffff34b65d93f.png",
+    "static/media/DataOpsLogo.png": "/static/media/DataOpsLogo.39014c4647a39b3927f9.png",
+    "static/media/DataOpsLogo_dark.png": "/static/media/DataOpsLogo_dark.3849d2f377a1d1d5497a.png",
     "index.html": "/index.html",
-    "main.7d9a7474.css.map": "/static/css/main.7d9a7474.css.map",
-    "main.1b5171ce.js.map": "/static/js/main.1b5171ce.js.map",
+    "main.4a1fb73c.css.map": "/static/css/main.4a1fb73c.css.map",
+    "main.35796e74.js.map": "/static/js/main.35796e74.js.map",
     "453.8efb9bde.chunk.js.map": "/static/js/453.8efb9bde.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.7d9a7474.css",
-    "static/js/main.1b5171ce.js"
+    "static/css/main.4a1fb73c.css",
+    "static/js/main.35796e74.js"
   ]
 }
