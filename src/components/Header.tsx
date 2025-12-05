@@ -3,7 +3,7 @@ import './Header.css';
 import lightLogo from "../assets/DataOpsLogo.png"
 import darkLogo from "../assets/DataOpsLogo_dark.png"
 
-type TabType = 'main' | 'text' | 'pdf' | 'api';
+type TabType = 'main' | 'text' | 'pdf' | 'api' | 'tasks';
 
 interface HeaderProps {
   activeTab: TabType;
@@ -67,6 +67,7 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
     { id: 'text', label: 'Text Tools' },
     { id: 'pdf', label: 'PDF Tools' },
     { id: 'api', label: 'API Tools' },
+    { id: 'tasks', label: 'Tasks Board' },
   ];
 
   return (

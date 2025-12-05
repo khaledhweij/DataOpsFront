@@ -4,10 +4,11 @@ import MainPage from './pages/MainPage';
 import TextTools from './pages/TextPage';
 import PdfTools from './pages/PdfPage';
 import ApiTester from './pages/ApiTester';
+import TaskBoard from './pages/TaskBoard';
 import './App.css';
 import InfoModal from './components/InfoModal';
 
-type TabType = 'main' | 'text' | 'pdf' | 'api';
+type TabType = 'main' | 'text' | 'pdf' | 'api' | 'tasks';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('main');
@@ -29,6 +30,7 @@ export default function App() {
         {activeTab === 'text' && <TextTools />}
         {activeTab === 'pdf' && <PdfTools />}
         {activeTab === 'api' && <ApiTester />}
+        {activeTab === 'tasks' && <TaskBoard />}
       </main>
     </div>
   );
