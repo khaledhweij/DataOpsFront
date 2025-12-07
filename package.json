@@ -13,6 +13,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "crypto-js": "^4.2.0",
     "diff": "^8.0.2",
     "pdf-lib": "^1.17.1",
     "react": "^19.2.0",
@@ -50,6 +51,7 @@
     ]
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "gh-pages": "^6.3.0"
   }
 }

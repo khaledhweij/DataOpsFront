@@ -1,10 +1,11 @@
 // pages/NewMainPage.tsx
 import { useState } from 'react';
 import './MainPage.css';
-import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, convertJsonOrToon, encodeBase64, encodeUrl } from '../functions/MainUtils';
+import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, performEncryption, convertJsonOrToon, encodeBase64, encodeUrl } from '../functions/MainUtils';
 import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from '../services/fileService';
 import { convertToEpoch } from '../services/dateService';
 import TextComparator, { ComparisonResult } from '../functions/TextComparator';
+import { AlgorithmPopup } from '../components/AlgorithmPopup';
 
 export default function NewMainPage() {
   const [firstContent, setFirstContent] = useState('');
@@ -17,6 +18,9 @@ export default function NewMainPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [lastFocusedTextarea, setLastFocusedTextarea] = useState<'first' | 'second' | null>(null);
   const [showOnlyDifferences, setShowOnlyDifferences] = useState(false);
+  const [showEncryptPopup, setShowEncryptPopup] = useState(false);
+  const [algorithm, setAlgorithm] = useState("");
+
 
   const comparator = new TextComparator();
 
@@ -30,6 +34,10 @@ export default function NewMainPage() {
 
   const toggleExpandedResult = () => {
     setExpandedResultTextarea(!expandedResultTextarea);
+  };
+
+  const handleEncryptClick = () => {
+    setShowEncryptPopup(true);
   };
 
   const readFileContent = (file: File, callback: (content: string) => void) => {
@@ -176,18 +184,19 @@ export default function NewMainPage() {
     alert(`${result.type}: ${result.message}`);
   };
 
-  const handleDecrypt = () => {
+  const handleEncrypt = (selectedAlgorithm: string) => {
     try {
+      setShowEncryptPopup(false);
+      setAlgorithm(selectedAlgorithm);
 
       const content = getContent();
-      backendApiHandler("decrypt", content, true).then((result: string) => {
-        setResults(result);
-      });
-
+      const output = performEncryption(content, selectedAlgorithm);
+      setResults(output);
     } catch (error) {
       alert((error as Error).message);
     }
-  }
+  };
+
 
   const handleComingSoon = () => {
     try {
@@ -428,7 +437,13 @@ export default function NewMainPage() {
             <h3 className="card-subtitle">Utilities</h3>
             <div className="button-grid button-grid-2">
               <button className="btn btn-outline" onClick={handleBeautify} title="XML, JSON, StackTrace">Beautify</button>
-              <button className="btn btn-outline" onClick={handleComingSoon}>Decrypt</button>
+              <button className="btn btn-outline" onClick={handleEncryptClick}>Encrypt</button>
+              {showEncryptPopup && (
+                <AlgorithmPopup
+                  onSelect={handleEncrypt}
+                  onClose={() => setShowEncryptPopup(false)}
+                />
+              )}
               <button className="btn btn-outline" onClick={handleValidate}>Validate</button>
               <button className="btn btn-outline" onClick={handleToonJson}>TOON - JSON</button>
               <button className="btn btn-outline" onClick={handleEpochConvert}>Epoch Converter</button>

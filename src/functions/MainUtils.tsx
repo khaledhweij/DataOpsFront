@@ -1,5 +1,6 @@
 import { postActionRaw } from "../services/apiService";
 import { encode, decode } from "@toon-format/toon";
+import CryptoJS from 'crypto-js';
 
 export const backendApiHandler = async (
   action: string,
@@ -37,28 +38,28 @@ export const backendApiHandler = async (
 // ===== AUTO-DETECT BEAUTIFY =====
 export const autoBeautify = (content: string): string => {
   const trimmed = content.trim();
-  
+
   if (!trimmed) {
-    throw new Error('Content is empty');
+    return '✗ Content is empty';
   }
 
-    const stackTracePatterns = [
-    /at\s+[\w$.]+\s*\([^)]*\)/m, 
-    /^\s*at\s+/m,                  
-    /\w+Exception:/m,               
-    /Error:\s*\n\s+at\s+/m,        
-    /^\s*\d+\s+[^\s]+\s+0x[0-9a-f]+/m, 
+  const stackTracePatterns = [
+    /at\s+[\w$.]+\s*\([^)]*\)/m,
+    /^\s*at\s+/m,
+    /\w+Exception:/m,
+    /Error:\s*\n\s+at\s+/m,
+    /^\s*\d+\s+[^\s]+\s+0x[0-9a-f]+/m,
   ];
-  
+
   if (isStackTrace(trimmed)) {
     return beautifyStackTrace(trimmed);
   }
-  
+
   // Check for EDIFACT
   if (trimmed.includes("'") && (trimmed.startsWith('UNB') || trimmed.startsWith('UNA') || trimmed.includes('UNH'))) {
     return beautifyEdifact(trimmed);
   }
-  
+
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     try {
       const parsed = JSON.parse(trimmed);
@@ -67,12 +68,12 @@ export const autoBeautify = (content: string): string => {
       // Not valid JSON, continue to XML check
     }
   }
-  
+
   if (trimmed.startsWith('<')) {
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(trimmed, 'application/xml');
-      
+
       if (!doc.querySelector('parsererror')) {
         return beautifyXml(trimmed);
       }
@@ -80,7 +81,7 @@ export const autoBeautify = (content: string): string => {
       // Not valid XML, treat as plain text
     }
   }
-  
+
   return trimmed;
 };
 
@@ -102,21 +103,21 @@ const beautifyStackTrace = (content: string): string => {
 // ===== AUTO-DETECT VALIDATION =====
 export const autoValidate = (content: string): { isValid: boolean; type: string; message: string } => {
   const trimmed = content.trim();
-  
+
   if (!trimmed) {
-    return { isValid: false, type: 'empty', message: 'Content is empty' };
+    return { isValid: false, type: 'empty', message: '✗ Content is empty' };
   }
-  
+
   // Check for EDIFACT
   if (trimmed.includes("'") && (trimmed.startsWith('UNB') || trimmed.startsWith('UNA') || trimmed.includes('UNH'))) {
     const isValid = validateEdifact(trimmed);
-    return { 
-      isValid, 
-      type: 'EDIFACT', 
-      message: isValid ? 'Valid EDIFACT' : 'Invalid EDIFACT format' 
+    return {
+      isValid,
+      type: 'EDIFACT',
+      message: isValid ? 'Valid EDIFACT' : 'Invalid EDIFACT format'
     };
   }
-  
+
   // Try JSON
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     try {
@@ -126,13 +127,13 @@ export const autoValidate = (content: string): { isValid: boolean; type: string;
       return { isValid: false, type: 'JSON', message: `Invalid JSON: ${(error as Error).message}` };
     }
   }
-  
+
   // Try XML
   if (trimmed.startsWith('<')) {
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(trimmed, 'application/xml');
-      
+
       if (doc.querySelector('parsererror')) {
         return { isValid: false, type: 'XML', message: 'Invalid XML format' };
       }
@@ -141,7 +142,7 @@ export const autoValidate = (content: string): { isValid: boolean; type: string;
       return { isValid: false, type: 'XML', message: `Invalid XML: ${(error as Error).message}` };
     }
   }
-  
+
   return { isValid: true, type: 'Text', message: 'Plain text content' };
 };
 
@@ -157,7 +158,7 @@ const validateEdifact = (edifact: string): boolean => {
   const hasTerminators = edifact.includes("'");
   const hasValidStart = edifact.startsWith('UNA') || edifact.startsWith('UNB');
   const hasSegments = edifact.includes('UNH') || edifact.includes('UNT');
-  
+
   return hasTerminators && hasValidStart && hasSegments;
 };
 
@@ -187,7 +188,7 @@ const beautifyXml = (xmlString: string): string => {
     const doc = parser.parseFromString(xmlString, 'application/xml');
     const serializer = new XMLSerializer();
     const xmlStr = serializer.serializeToString(doc);
-    
+
     return formatXml(xmlStr);
   } catch (error) {
     throw new Error('Failed to beautify XML');
@@ -197,7 +198,7 @@ const beautifyXml = (xmlString: string): string => {
 const formatXml = (xml: string): string => {
   let formatted = '';
   let indent = 0;
-  
+
   xml.split(/>\s*</).forEach((node) => {
     if (node.match(/^\/\w/)) {
       indent = Math.max(0, indent - 1);
@@ -207,7 +208,7 @@ const formatXml = (xml: string): string => {
       indent++;
     }
   });
-  
+
   return formatted.substring(1, formatted.length - 2);
 };
 
@@ -228,10 +229,10 @@ export const decodeJwt = (token: string): string => {
     if (parts.length !== 3) {
       throw new Error('Invalid JWT format');
     }
-    
+
     const header = JSON.parse(atob(parts[0]));
     const payload = JSON.parse(atob(parts[1]));
-    
+
     return JSON.stringify({ header, payload }, null, 2);
   } catch (error) {
     throw new Error('Invalid JWT token');
@@ -243,7 +244,7 @@ export const decodeUuid = (uuid: string): string => {
   if (!/^[0-9a-f]{32}$/i.test(cleaned)) {
     throw new Error('Invalid UUID format');
   }
-  
+
   return `${cleaned.substring(0, 8)}-${cleaned.substring(8, 12)}-${cleaned.substring(12, 16)}-${cleaned.substring(16, 20)}-${cleaned.substring(20, 32)}`;
 };
 
@@ -274,7 +275,7 @@ export const decodeBase64 = (str: string): string => {
 export function convertJsonOrToon(input: string): string {
   try {
     const parsed = JSON.parse(input);
-    return encode(parsed, {  });
+    return encode(parsed, {});
   } catch (_) {
     // Not JSON → try TOON
   }
@@ -288,3 +289,50 @@ export function convertJsonOrToon(input: string): string {
 
   return "Input is neither valid JSON nor valid TOON format.";
 }
+
+export const performEncryption = (content: string, method: string) => {
+
+  const trimmed = content.trim();
+
+  if (!trimmed) {
+    return '✗ Content is empty';
+  }
+
+  let encrypted = '';
+
+  try {
+    switch (method) {
+      case 'MD5':
+        encrypted = CryptoJS.MD5(content).toString();
+        break;
+      case 'SHA1':
+        encrypted = CryptoJS.SHA1(content).toString();
+        break;
+      case 'SHA256':
+        encrypted = CryptoJS.SHA256(content).toString();
+        break;
+      case 'SHA384':
+        encrypted = CryptoJS.SHA384(content).toString();
+        break;
+      case 'SHA512':
+        encrypted = CryptoJS.SHA512(content).toString();
+        break;
+      case 'SHA3':
+        encrypted = CryptoJS.SHA3(content).toString();
+        break;
+      case 'RIPEMD160':
+        encrypted = CryptoJS.RIPEMD160(content).toString();
+        break;
+      case 'BCrypt':
+        // Note: Real BCrypt needs a backend. This is a simple hash simulation.
+        encrypted = CryptoJS.SHA256(content + 'salt').toString();
+        break;
+      default:
+        encrypted = 'Unknown encryption method';
+    }
+
+    return encrypted;
+  } catch (error) {
+    return `✗ Encryption error: ${error}`;
+  }
+};
