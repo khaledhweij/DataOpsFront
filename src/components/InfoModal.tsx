@@ -63,7 +63,6 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
         <div className="built-for">
           <h2 className="text-xl font-semibold mb-2">Developed By</h2>
           <p>
-            <strong>Khaled Hweij</strong> (
             <a
               href="https://www.linkedin.com/in/khaledhweij/"
               target="_blank"
@@ -72,7 +71,6 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
             >
               @KhaledHweij
             </a>
-            )
           </p>
           <p>
             Contributions welcome at:{' '}

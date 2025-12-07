@@ -79,11 +79,11 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
             <img src={logo} alt="Logo" className="logo" />
           </div>
           
-          <div className="logo-section">
+          {/* <div className="logo-section">
             <div>
               <span className="header-text">DataOps</span>
             </div>
-          </div>
+          </div> */}
 
           <div className="header-controls">
             <button

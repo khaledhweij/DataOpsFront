@@ -53,8 +53,8 @@
   cursor: pointer;
   font-size: 14px;
   border-radius: 4px;
-  background: #150879d7;
-  color: #ffffff;
+  background: var(--text-primary);
+  color: var(--bg-main);
   transition: 0.2s;
   display: flex;
   align-items: center;
@@ -137,4 +137,9 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.modal-link {
+  color: var(--text-primary);
+  text-decoration: dotted underline;
 }

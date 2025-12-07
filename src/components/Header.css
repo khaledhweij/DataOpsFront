@@ -51,12 +51,13 @@
   border-top-left-radius: 0.3cm;
   border-bottom-left-radius: 0.3cm;
   padding-left: 10px;
+  margin-top: 10px;
   gap: 1rem;
 }
 
 @media (max-width: 768px) {
   .logo-container {
-    width: 100px;
+    width: 120px;
     padding-left: 5px;
     gap: 0.5rem;
   }
@@ -65,8 +66,8 @@
 /* Extra small phones */
 @media (max-width: 480px) {
   .logo-container {
-    width: 80px;
-    padding-left: 5px;
+    width: 100px;
+    padding-left: 0px;
   }
 }
 
@@ -77,7 +78,7 @@
 }
 
 .header-text {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.025em;

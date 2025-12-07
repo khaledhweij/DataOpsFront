@@ -1,6 +1,8 @@
 export function convertToEpoch(content: string): string {
   const trimmed = content.trim();
-  if (!trimmed) throw new Error("Content cannot be empty.");
+    if (!trimmed) {
+    return '✗ Content is empty';
+  }
 
   let date: Date;
   let epochMillis: number;
