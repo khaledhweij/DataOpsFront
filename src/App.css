@@ -261,6 +261,7 @@ body {
   color: var(--text-primary);
 }
 
+.comparison-content-expanded,
 .textarea-expanded {
     position: fixed;
     top: 15%;
@@ -281,6 +282,12 @@ body {
     overflow: auto;
     transition: all 0.1s ease;
     color: var(--text-primary);
+}
+
+.comparison-content:focus,
+.textarea-expanded:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .input {

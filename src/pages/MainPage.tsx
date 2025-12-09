@@ -1,5 +1,5 @@
 // pages/NewMainPage.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './MainPage.css';
 import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, performEncryption, convertJsonOrToon, encodeBase64, encodeUrl } from '../functions/MainUtils';
 import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from '../services/fileService';
@@ -15,12 +15,15 @@ export default function NewMainPage() {
   const [expandedTextarea1, setExpandedTextarea1] = useState(false);
   const [expandedTextarea2, setExpandedTextarea2] = useState(false);
   const [expandedResultTextarea, setExpandedResultTextarea] = useState(false);
+  const [expandedLeftComparisonResultArea, setExpandedLeftComparisonResultArea] = useState(false);
+  const [expandedRightComparisonResultArea, setExpandedRightComparisonResultArea] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [lastFocusedTextarea, setLastFocusedTextarea] = useState<'first' | 'second' | null>(null);
   const [showOnlyDifferences, setShowOnlyDifferences] = useState(false);
   const [showEncryptPopup, setShowEncryptPopup] = useState(false);
   const [algorithm, setAlgorithm] = useState("");
-
+  const [currentDiffIndex, setCurrentDiffIndex] = useState(0);
+  const [totalDiffs, setTotalDiffs] = useState({ left: 0, right: 0 });
 
   const comparator = new TextComparator();
 
@@ -36,8 +39,54 @@ export default function NewMainPage() {
     setExpandedResultTextarea(!expandedResultTextarea);
   };
 
+
+  const toggleExpandedRightComparisonResult = () => {
+    setExpandedRightComparisonResultArea(!expandedRightComparisonResultArea);
+  };
+
+    const toggleExpandedLeftComparisonResult = () => {
+    setExpandedLeftComparisonResultArea(!expandedLeftComparisonResultArea);
+  };
+
   const handleEncryptClick = () => {
     setShowEncryptPopup(true);
+  };
+
+  useEffect(() => {
+    if (comparisonResult) {
+      // Count differences
+      const leftDiffs = comparisonResult.formattedText1.match(/<span[^>]*class="diff-removed"/g)?.length || 0;
+      const rightDiffs = comparisonResult.formattedText2.match(/<span[^>]*class="diff-added"/g)?.length || 0;
+      setTotalDiffs({ left: leftDiffs, right: rightDiffs });
+      setCurrentDiffIndex(0);
+    }
+  }, [comparisonResult]);
+
+  // Navigate to next difference
+  const goToNextDiff = (side: 'left' | 'right') => {
+    const container = side === 'left'
+      ? document.querySelector('.comparison-column:first-child .comparison-content')
+      : document.querySelector('.comparison-column:last-child .comparison-content');
+
+    if (!container) return;
+
+    const diffClass = side === 'left' ? 'diff-removed' : 'diff-added';
+    const diffs = container.querySelectorAll(`span[style*="${side === 'left' ? '#e74c3c' : '#2ecc71'}"]`);
+
+    if (diffs.length === 0) return;
+
+    const nextIndex = (currentDiffIndex + 1) % diffs.length;
+    setCurrentDiffIndex(nextIndex);
+
+    // Scroll to the difference
+    const targetDiff = diffs[currentDiffIndex] as HTMLElement;
+    targetDiff.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Highlight briefly
+    targetDiff.style.backgroundColor = side === 'left' ? 'rgba(231, 76, 60, 0.3)' : 'rgba(46, 204, 113, 0.3)';
+    setTimeout(() => {
+      targetDiff.style.backgroundColor = '';
+    }, 1000);
   };
 
   const readFileContent = (file: File, callback: (content: string) => void) => {
@@ -483,6 +532,8 @@ export default function NewMainPage() {
                 onClick={() => {
                   setComparisonResult(null);
                   setShowOnlyDifferences(false);
+                  setCurrentDiffIndex(0);
+
                 }}
               >
                 <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -540,8 +591,27 @@ export default function NewMainPage() {
                   </svg>
                   <span>Original (Deletions in Red)</span>
                 </div>
+                {comparisonResult.deletions > 0 && (
+                  <button
+                    className="btn-nav"
+                    onClick={() => goToNextDiff('left')}
+                    title="Next difference"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Next
+                  </button>
+                )}
                 <div
-                  className="comparison-content"
+                  className={expandedLeftComparisonResultArea ? "textarea-expanded" : "comparison-content"}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+                      e.preventDefault();
+                      toggleExpandedLeftComparisonResult();
+                    }
+                  }}
                   dangerouslySetInnerHTML={{ __html: getFilteredComparison()?.formattedText1 || '' }}
                 />
               </div>
@@ -555,8 +625,27 @@ export default function NewMainPage() {
                   </svg>
                   <span>Modified (Additions in Green)</span>
                 </div>
+                {comparisonResult.additions > 0 && (
+                  <button
+                    className="btn-nav"
+                    onClick={() => goToNextDiff('right')}
+                    title="Next difference"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Next
+                  </button>
+                )}
                 <div
-                  className="comparison-content"
+                  className={expandedRightComparisonResultArea ? "comparison-content-expanded" : "comparison-content"}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
+                      e.preventDefault();
+                      toggleExpandedRightComparisonResult();
+                    }
+                  }}
                   dangerouslySetInnerHTML={{ __html: getFilteredComparison()?.formattedText2 || '' }}
                 />
               </div>
