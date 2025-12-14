@@ -14,7 +14,6 @@
   padding: 1rem;
 }
 
-/* Center popup */
 .modal-box {
   background: var(--bg-card);
   padding: 25px 35px;
@@ -28,7 +27,6 @@
   overflow-y: auto; 
 }
 
-/* Mobile optimization */
 @media (max-width: 768px) {
   .modal-overlay {
     padding: 0.5rem;
@@ -66,7 +64,6 @@
   opacity: 0.85;
 }
 
-/* ===== Title ===== */
 .modal-box h2 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -75,7 +72,6 @@
   text-align: center;
 }
 
-/* ===== Paragraphs ===== */
 .modal-box p {
   color: var(--text-secondary);
   line-height: 1.6;
@@ -86,8 +82,6 @@
   color: var(--text-primary);
 }
 
-
-/* ===== Lists ===== */
 .modal-box ul {
   margin: 0;
   padding-left: 1.25rem;
@@ -102,7 +96,6 @@
   color: var(--text-primary);
 }
 
-/* ===== Section Headings ===== */
 .modal-box h2.text-xl {
   font-size: 1.3rem;
   font-weight: 600;
@@ -111,8 +104,6 @@
   color: var(--text-primary);
 }
 
-
-/* ===== Scrollbar Styling (optional) ===== */
 .modal-box::-webkit-scrollbar {
   width: 8px;
 }
@@ -122,7 +113,6 @@
   border-radius: 8px;
 }
 
-/* Fade animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
@@ -142,4 +132,36 @@
 .modal-link {
   color: var(--text-primary);
   text-decoration: dotted underline;
+}
+
+.language-switch {
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  background: var(--bg-secondary);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.language-switch button {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.language-switch button.active {
+  background: var(--primary-color);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.language-switch button:hover:not(.active) {
+  color: var(--text-primary);
 }

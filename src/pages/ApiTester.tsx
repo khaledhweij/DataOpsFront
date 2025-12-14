@@ -331,6 +331,8 @@ export default function ApiTester() {
           {response || 'Response will appear here...'}
         </pre>
       </div>
+
+      <div className="footer-container">Open Source - Licensed under MIT License - Version 1.0</div>
     </div>
   );
 }
