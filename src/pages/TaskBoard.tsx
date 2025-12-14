@@ -15,14 +15,15 @@ interface Column {
     id: string;
     title: string;
     color: string;
+    order: number;
     tasks: Task[];
 }
 
 const DEFAULT_COLUMNS: Column[] = [
-    { id: 'not-created', title: 'Not Created', color: '#6B7280', tasks: [] },
-    { id: 'pending', title: 'Created but Pending', color: '#F59E0B', tasks: [] },
-    { id: 'in-process', title: 'In Process', color: '#3B82F6', tasks: [] },
-    { id: 'done', title: 'Done', color: '#10B981', tasks: [] },
+    { id: 'not-created', title: 'Not Created', color: '#6B7280', order: 0, tasks: [] },
+    { id: 'pending', title: 'Created but Pending', color: '#F59E0B', order: 1, tasks: [] },
+    { id: 'in-process', title: 'In Process', color: '#3B82F6', order: 2, tasks: [] },
+    { id: 'done', title: 'Done', color: '#10B981', order: 3, tasks: [] },
 ];
 
 export default function TaskBoard() {
@@ -48,6 +49,8 @@ export default function TaskBoard() {
     const [newColumnColor, setNewColumnColor] = useState('#3B9FBD');
     const [editColumnTitle, setEditColumnTitle] = useState('');
     const [editColumnColor, setEditColumnColor] = useState('');
+    const [editingColumnOrder, setEditingColumnOrder] = useState<string | null>(null);
+    const [newColumnOrder, setNewColumnOrder] = useState<number>(0);
 
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskDescription, setNewTaskDescription] = useState('');
@@ -98,6 +101,7 @@ export default function TaskBoard() {
             id: `col-${Date.now()}`,
             title: newColumnTitle,
             color: newColumnColor,
+            order: columns.length,
             tasks: [],
         };
 
@@ -105,6 +109,37 @@ export default function TaskBoard() {
         setNewColumnTitle('');
         setNewColumnColor('#3B9FBD');
         setShowNewColumnModal(false);
+    };
+
+    const updateColumnOrder = (columnId: string, newOrder: number) => {
+        const column = columns.find(c => c.id === columnId);
+        if (!column) return;
+
+        const oldOrder = column.order;
+
+        const updatedColumns = columns.map(col => {
+            if (col.id === columnId) {
+                return { ...col, order: newOrder };
+            }
+
+            if (newOrder > oldOrder) {
+                if (col.order > oldOrder && col.order <= newOrder) {
+                    return { ...col, order: col.order - 1 };
+                }
+            } else {
+                if (col.order >= newOrder && col.order < oldOrder) {
+                    return { ...col, order: col.order + 1 };
+                }
+            }
+
+            return col;
+        });
+
+        setColumns(updatedColumns);
+    };
+
+    const getSortedColumns = () => {
+        return [...columns].sort((a, b) => a.order - b.order);
     };
 
     const startEditColumn = (column: Column) => {
@@ -331,7 +366,7 @@ export default function TaskBoard() {
 
             {/* Board Columns */}
             <div className="board-columns">
-                {columns.map(column => (
+                {getSortedColumns().map(column => (
                     <div key={column.id} className="board-column">
                         <div className="column-header" style={{ borderTopColor: column.color }}>
                             <div className="column-info">
@@ -519,6 +554,7 @@ export default function TaskBoard() {
                 <div className="modal-overlay" onClick={cancelColumnEdit}>
                     <div className="modal-box" onClick={(e) => e.stopPropagation()}>
                         <h2 className="modal-title">Edit Column</h2>
+
                         <div className="form-group">
                             <label className="form-label">Column Title</label>
                             <input
@@ -530,6 +566,31 @@ export default function TaskBoard() {
                                 autoFocus
                             />
                         </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Column Order</label>
+                            <select
+                                className="input"
+                                value={columns.find(c => c.id === editingColumnId)?.order || 0}
+                                onChange={(e) => {
+                                    const newOrder = parseInt(e.target.value);
+                                    // Update order immediately for preview
+                                    setColumns(columns.map(col =>
+                                        col.id === editingColumnId
+                                            ? { ...col, order: newOrder }
+                                            : col
+                                    ));
+                                }}
+                            >
+                                {Array.from({ length: columns.length }, (_, i) => (
+                                    <option key={i} value={i}>
+                                        Position {i + 1} {i === 0 ? '(First)' : i === columns.length - 1 ? '(Last)' : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="form-hint">Choose where this column appears in the board</p>
+                        </div>
+
                         <div className="form-group">
                             <label className="form-label">Column Color</label>
                             <div className="color-picker">
@@ -543,6 +604,7 @@ export default function TaskBoard() {
                                 ))}
                             </div>
                         </div>
+
                         <div className="modal-actions">
                             <button className="btn btn-secondary" onClick={cancelColumnEdit}>
                                 Cancel

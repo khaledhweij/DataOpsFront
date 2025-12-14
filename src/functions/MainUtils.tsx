@@ -260,6 +260,46 @@ export const decodeUrl = (str: string): string => {
   }
 };
 
+export const escapeJson = (content: string): string => {
+
+  if (!content) {
+    return 'Please enter JSON content to escape';
+  }
+
+  try {
+    // Escape JSON (add backslashes before quotes and special chars)
+    const escaped = JSON.stringify(content);
+    return escaped;
+  } catch (error) {
+    return `✗ Error escaping JSON: content is not valid JSON`;
+  }
+};
+
+export const unescapeJson = (content: string): string => {
+
+  if (!content) {
+    return 'Please enter escaped JSON content';
+  }
+
+  try {
+    let unescaped = content.trim();
+    if (unescaped.startsWith('"') && unescaped.endsWith('"')) {
+      unescaped = unescaped.slice(1, -1);
+    }
+
+    unescaped = JSON.parse(`"${unescaped}"`);
+
+    try {
+      const parsed = JSON.parse(unescaped);
+      return JSON.stringify(parsed, null, 2);
+    } catch {
+      return unescaped;
+    }
+  } catch (error) {
+    return `✗ Error unescaping JSON: content is not valid escaped JSON`;
+  }
+};
+
 export const encodeBase64 = (str: string): string => {
   return btoa(unescape(encodeURIComponent(str)));
 };

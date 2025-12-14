@@ -1,7 +1,7 @@
 // pages/NewMainPage.tsx
 import { useEffect, useState } from 'react';
 import './MainPage.css';
-import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, performEncryption, convertJsonOrToon, encodeBase64, encodeUrl } from '../functions/MainUtils';
+import { autoBeautify, autoValidate, backendApiHandler, decodeBase64, decodeJwt, decodeUrl, performEncryption, convertJsonOrToon, encodeBase64, encodeUrl, escapeJson, unescapeJson } from '../functions/MainUtils';
 import { downloadZipFromBase64, viewHtmlFromBase64, viewPdfFromBase64 } from '../services/fileService';
 import { convertToEpoch } from '../services/dateService';
 import TextComparator, { ComparisonResult } from '../functions/TextComparator';
@@ -385,6 +385,25 @@ export default function NewMainPage() {
     }
   };
 
+    const handleEscapeJson = () => {
+    try {
+      const content = getContent();
+      const escapedJson = escapeJson(content);
+      setResults(escapedJson);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
+    const handleUnescapeJson = () => {
+    try {
+      const content = getContent();
+      const unescapedJson = unescapeJson(content);
+      setResults(unescapedJson);
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
 
   const handleClear = () => {
     setFirstContent('');
@@ -441,8 +460,8 @@ export default function NewMainPage() {
               <button className="btn btn-outline" onClick={handleComingSoon}>Decode UUID</button>
               <button className="btn btn-outline" onClick={handleDecodeUrl}>Decode URL</button>
               <button className="btn btn-outline" onClick={handleEncodeUrl}>Encode URL</button>
-              <button className="btn btn-outline" onClick={handleComingSoon}>Decode EBCDIC</button>
-              <button className="btn btn-outline" onClick={handleComingSoon}>Encode EBCDIC</button>
+              <button className="btn btn-outline" onClick={handleEscapeJson}>Escape JSON</button>
+              <button className="btn btn-outline" onClick={handleUnescapeJson}>Unescape JSON</button>
             </div>
           </div>
         </div>
@@ -606,6 +625,7 @@ export default function NewMainPage() {
                 <div
                   className={expandedLeftComparisonResultArea ? "textarea-expanded" : "comparison-content"}
                   tabIndex={0}
+                  title="(Alt + Z to expand)"
                   onKeyDown={(e) => {
                     if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
                       e.preventDefault();
@@ -640,6 +660,7 @@ export default function NewMainPage() {
                 <div
                   className={expandedRightComparisonResultArea ? "comparison-content-expanded" : "comparison-content"}
                   tabIndex={0}
+                  title="(Alt + Z to expand)"
                   onKeyDown={(e) => {
                     if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
                       e.preventDefault();
@@ -658,6 +679,7 @@ export default function NewMainPage() {
               readOnly
               value={results || ""}
               placeholder="No results to display."
+              title="Result (Alt + Z to expand)"
               onKeyDown={(e) => {
                 if (e.altKey && e.key === "z" || e.altKey && e.key === "Z") {
                   e.preventDefault();
