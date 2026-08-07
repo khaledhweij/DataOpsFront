@@ -1,12 +1,12 @@
-.pdf-tools .button-grid-4 {
+.pdf-tools .button-grid-5 {
   display: grid;
   gap: 0.75rem;
   grid-template-columns: repeat(2, 1fr);
 }
 
 @media (min-width: 768px) {
-  .pdf-tools .button-grid-4 {
-    grid-template-columns: repeat(4, 1fr);
+  .pdf-tools .button-grid-5 {
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -175,4 +175,8 @@
   gap: 1rem;
   flex-wrap: wrap;
   margin-top: 1rem;
+}
+
+.button-grid-5 {
+  grid-template-columns: repeat(5, 1fr);
 }

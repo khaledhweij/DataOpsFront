@@ -41,9 +41,55 @@ export default function PdfTools() {
     document.getElementById('pdf-file-input')?.click();
   };
 
-  const handleConvert = () => {
-    alert("Coming soon!");
-  }
+  const handleConvertImage = async () => {
+      const imageFiles = selectedFiles.filter(f =>
+          ['image/jpeg', 'image/jpg', 'image/png'].includes(f.type.toLowerCase())
+      );
+
+      if (imageFiles.length === 0) {
+          setResults('Please select at least 1 image file (JPG or PNG) to convert.');
+          return;
+      }
+
+      setIsProcessing(true);
+      try {
+          const pdf = await pdfOps.imagesToPdf(imageFiles);
+          setPdfResult(pdf);
+          setPdfFilename(imageFiles.length > 1 ? 'images_merged.pdf' : 'converted.pdf');
+          setResults(`✓ Successfully converted ${imageFiles.length} image(s) to PDF`);
+      } catch (error) {
+          setResults(`✗ Error converting images: ${error}`);
+          setPdfResult(null);
+      } finally {
+          setIsProcessing(false);
+      }
+  };
+
+  const handleCompress = async () => {
+    const pdfFiles = selectedFiles.filter(f => f.type.toLowerCase() === 'application/pdf');
+
+    if (pdfFiles.length === 0) {
+        setResults('Please select a PDF file to compress.');
+        return;
+    }
+
+    setIsProcessing(true);
+    try {
+        const file = pdfFiles[0];
+        const originalSize = file.size;
+        const compressed = await pdfOps.compressPdfByRasterizing(file);
+        const savedPct = (((originalSize - compressed.length) / originalSize) * 100).toFixed(1);
+
+        setPdfResult(compressed);
+        setPdfFilename(`compressed_${file.name}`);
+        setResults(`✓ Compressed: ${(originalSize / 1024).toFixed(1)} KB → ${(compressed.length / 1024).toFixed(1)} KB (${savedPct}% smaller)`);
+    } catch (error) {
+        setResults(`✗ Error compressing PDF: ${error}`);
+        setPdfResult(null);
+    } finally {
+        setIsProcessing(false);
+    }
+  };
 
   const handleMerge = async () => {
     if (!selectedFiles || selectedFiles.length < 2) {
@@ -157,7 +203,7 @@ export default function PdfTools() {
             <input
               id="pdf-file-input"
               type="file"
-              accept=".pdf"
+              accept=".pdf,.jpg,.jpeg,.png"
               multiple
               style={{ display: 'none' }}
               onChange={handleFileSelect}
@@ -177,7 +223,7 @@ export default function PdfTools() {
           <p className="file-upload-text">
             {selectedFiles ? `${selectedFiles.length} file(s) selected` : 'No files selected'}
           </p>
-          <p className="file-upload-hint">Click here or drag & drop PDF files</p>
+          <p className="file-upload-hint">Click here or drag & drop PDF or image files</p>
 
           {selectedFiles && selectedFiles.length > 0 && (
             <div className="file-list">
@@ -206,8 +252,8 @@ export default function PdfTools() {
           )}
         </div>
       </div>
-      <div className="button-grid button-grid-4 mb-3">
-        <button className="btn btn-outline" onClick={handleConvert}>Convert</button>
+      <div className="button-grid button-grid-5 mb-3">
+        <button className="btn btn-outline" onClick={handleConvertImage}>Convert Images</button>
         <button
           className="btn btn-outline"
           onClick={handleMerge}
@@ -228,6 +274,9 @@ export default function PdfTools() {
           disabled={isProcessing}
         >
           {isProcessing ? 'Processing...' : 'Remove'}
+        </button>
+        <button className="btn btn-outline" onClick={handleCompress} disabled={isProcessing}>
+          {isProcessing ? 'Processing...' : 'Compress'}
         </button>
       </div>
 
