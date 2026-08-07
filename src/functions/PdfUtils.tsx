@@ -1,5 +1,10 @@
 // utils/PdfUtils.ts
 import { PDFDocument } from 'pdf-lib';
+import * as pdfjsLib from 'pdfjs-dist';
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+).toString();
 
 export class PdfUtils {
     async mergePdfs(files: File[]): Promise<Uint8Array> {
@@ -72,4 +77,75 @@ export class PdfUtils {
             this.downloadPdf(pdf, `${baseFilename}_page_${index + 1}.pdf`);
         });
     }
+
+    async imagesToPdf(files: File[]): Promise<Uint8Array> {
+        const pdfDoc = await PDFDocument.create();
+
+        for (const file of files) {
+            const bytes = new Uint8Array(await file.arrayBuffer());
+            const type = file.type.toLowerCase();
+
+            let embeddedImage;
+            if (type === 'image/jpeg' || type === 'image/jpg') {
+                embeddedImage = await pdfDoc.embedJpg(bytes);
+            } else if (type === 'image/png') {
+                embeddedImage = await pdfDoc.embedPng(bytes);
+            } else {
+                throw new Error(`Unsupported image type: ${file.type} (${file.name})`);
+            }
+
+            const { width, height } = embeddedImage;
+            const page = pdfDoc.addPage([width, height]);
+            page.drawImage(embeddedImage, { x: 0, y: 0, width, height });
+        }
+
+        return await pdfDoc.save();
+    }
+
+    async compressPdf(file: File): Promise<Uint8Array> {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await PDFDocument.load(arrayBuffer, { updateMetadata: false });
+
+        pdf.setTitle('');
+        pdf.setAuthor('');
+        pdf.setSubject('');
+        pdf.setKeywords([]);
+        pdf.setProducer('');
+        pdf.setCreator('');
+
+        return await pdf.save({ useObjectStreams: true });
+    }
+
+
+    async compressPdfByRasterizing(file: File, jpegQuality = 0.6, scale = 1.5): Promise<Uint8Array> {
+        const arrayBuffer = await file.arrayBuffer();
+        const srcDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const outDoc = await PDFDocument.create();
+
+        for (let i = 1; i <= srcDoc.numPages; i++) {
+            const page = await srcDoc.getPage(i);
+            const viewport = page.getViewport({ scale });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d')!;
+
+            await page.render({
+                canvas,           // <-- required in newer pdfjs-dist typings
+                canvasContext: ctx,
+                viewport,
+            }).promise;
+
+            const jpegDataUrl = canvas.toDataURL('image/jpeg', jpegQuality);
+            const jpegBytes = Uint8Array.from(atob(jpegDataUrl.split(',')[1]), c => c.charCodeAt(0));
+
+            const embedded = await outDoc.embedJpg(jpegBytes);
+            const outPage = outDoc.addPage([viewport.width, viewport.height]);
+            outPage.drawImage(embedded, { x: 0, y: 0, width: viewport.width, height: viewport.height });
+        }
+
+        return await outDoc.save({ useObjectStreams: true });
+    }
+
 }
