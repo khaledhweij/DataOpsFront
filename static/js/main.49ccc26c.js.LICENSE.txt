@@ -64,6 +64,12 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 
 /**
+ * @license qrcode.react
+ * Copyright (c) Paul O'Shannessy
+ * SPDX-License-Identifier: ISC
+ */
+
+/**
  * @licstart The following is the entire license notice for the
  * JavaScript code in this page
  *
