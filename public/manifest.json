@@ -1,6 +1,7 @@
 {
   "name": "DataOps",
   "short_name": "DataOps",
+  "start_url": "/",
 "icons": [
     {
       "src": "favicon.ico",
