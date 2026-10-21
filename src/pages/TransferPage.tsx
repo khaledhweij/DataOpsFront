@@ -1,9 +1,11 @@
 // pages/TransferPage.tsx
 import { useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useSearchParams } from 'react-router-dom';
 import './PdfTools.css';
 import './TransferPage.css';
 import { TransferSession, normalizeCode, isValidCode, TransferCallbacks, TransferKind } from '../services/transferService';
+import { TRANSFER_CODE_PARAM, transferJoinPath } from '../routes';
 
 type Stage = 'choose' | 'hosting' | 'joining' | 'connected' | 'disconnected' | 'error';
 
@@ -67,11 +69,9 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-interface TransferPageProps {
-  initialCode?: string;
-}
-
-export default function TransferPage({ initialCode }: TransferPageProps) {
+export default function TransferPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCode = searchParams.get(TRANSFER_CODE_PARAM);
   const [stage, setStage] = useState<Stage>('choose');
   const [code, setCode] = useState('');
   const [codeInput, setCodeInput] = useState('');
@@ -255,9 +255,12 @@ export default function TransferPage({ initialCode }: TransferPageProps) {
     return () => window.removeEventListener('beforeunload', warn);
   }, [stage]);
 
-  // Opened from a scanned QR code: connect straight away.
+  // Opened from a scanned QR code: connect straight away, then drop the code
+  // from the URL so a reload doesn't try to rejoin a finished session.
   useEffect(() => {
-    if (initialCode) handleJoin(initialCode);
+    if (!initialCode) return;
+    handleJoin(initialCode);
+    setSearchParams({}, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode]);
 
@@ -270,7 +273,7 @@ export default function TransferPage({ initialCode }: TransferPageProps) {
     };
   }, []);
 
-  const shareLink = `${window.location.origin}${window.location.pathname}?transfer=${code}`;
+  const shareLink = `${window.location.origin}${transferJoinPath(code)}`;
   const hasLargeFile = sent.some(item => item.size > LARGE_FILE_BYTES);
 
   const renderItem = (item: TransferItem, direction: 'sent' | 'received') => {

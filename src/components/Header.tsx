@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import './Header.css';
 import lightLogo from "../assets/DataOpsLogo.png"
 import darkLogo from "../assets/DataOpsLogo_dark.png"
-
-type TabType = 'main' | 'text' | 'pdf' | 'api' | 'tasks' | 'transfer';
+import { appRoutes } from '../routes';
 
 interface HeaderProps {
-  activeTab: TabType;
-  onTabChange: (tab: TabType) => void;
   showAbout: boolean;
   onToggleAbout: () => void;
 }
 
-export default function Header({ activeTab, onTabChange, showAbout, onToggleAbout }: HeaderProps) {
+export default function Header({ showAbout, onToggleAbout }: HeaderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [logo, setLogo] = useState<typeof lightLogo | typeof darkLogo>(lightLogo);
   const [isVisible, setIsVisible] = useState(true);
@@ -62,15 +60,6 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
     localStorage.setItem('logo', newLogo);
   };
 
-  const tabs: { id: TabType; label: string }[] = [
-    { id: 'main', label: 'Main Page' },
-    { id: 'text', label: 'Text Tools' },
-    { id: 'pdf', label: 'PDF Tools' },
-    { id: 'api', label: 'API Tools' },
-    { id: 'tasks', label: 'Tasks Board' },
-    { id: 'transfer', label: 'Transfer' },
-  ];
-
   return (
     <header className={`header ${!isVisible ? 'header-hidden' : ''}`}>
       <div className="header-container">
@@ -116,14 +105,15 @@ export default function Header({ activeTab, onTabChange, showAbout, onToggleAbou
         </div>
 
         <nav className="tab-nav">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => onTabChange(tab.id)}
+          {appRoutes.map(route => (
+            <NavLink
+              key={route.path}
+              to={route.path}
+              end
+              className={({ isActive }) => `tab-button ${isActive ? 'active' : ''}`}
             >
-              {tab.label}
-            </button>
+              {route.label}
+            </NavLink>
           ))}
         </nav>
       </div>

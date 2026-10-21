@@ -1,39 +1,28 @@
-import { useState } from 'react';
+import { ReactNode, Suspense, useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/Header';
-import MainPage from './pages/MainPage';
-import TextTools from './pages/TextPage';
-import PdfTools from './pages/PdfPage';
-import ApiTester from './pages/ApiTester';
-import TaskBoard from './pages/TaskBoard';
-import TransferPage from './pages/TransferPage';
-import './App.css';
 import InfoModal from './components/InfoModal';
+import { appRoutes, HOME_PATH, transferJoinPath } from './routes';
+import './App.css';
 
-type TabType = 'main' | 'text' | 'pdf' | 'api' | 'tasks' | 'transfer';
-
-// A scanned transfer QR code opens the site with ?transfer=CODE.
-function readTransferCode(): string | undefined {
-  const code = new URLSearchParams(window.location.search).get('transfer');
-  if (!code) return undefined;
-  window.history.replaceState(null, '', window.location.pathname);
-  return code;
+function PageTitle({ title, children }: { title: string; children: ReactNode }) {
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+  return <>{children}</>;
 }
 
-const initialTransferCode = readTransferCode();
-
 export default function App() {
-  const [transferCode, setTransferCode] = useState(initialTransferCode);
-  const [activeTab, setActiveTab] = useState<TabType>(transferCode ? 'transfer' : 'main');
   const [showAbout, setShowAbout] = useState(false);
+  const location = useLocation();
+
+  // QR codes generated before path routing point at /?transfer=CODE.
+  const legacyTransferCode = location.pathname === HOME_PATH && new URLSearchParams(location.search).get('transfer');
+  if (legacyTransferCode) return <Navigate to={transferJoinPath(legacyTransferCode)} replace />;
 
   return (
     <div className="app">
       <Header
-        activeTab={activeTab}
-        onTabChange={tab => {
-          setActiveTab(tab);
-          setTransferCode(undefined);
-        }}
         showAbout={showAbout}
         onToggleAbout={() => setShowAbout(!showAbout)}
       />
@@ -41,12 +30,18 @@ export default function App() {
       <main className="main-content">
         {showAbout && <InfoModal onClose={() => setShowAbout(false)} />}
 
-        {activeTab === 'main' && <MainPage />}
-        {activeTab === 'text' && <TextTools />}
-        {activeTab === 'pdf' && <PdfTools />}
-        {activeTab === 'api' && <ApiTester />}
-        {activeTab === 'tasks' && <TaskBoard />}
-        {activeTab === 'transfer' && <TransferPage initialCode={transferCode} />}
+        <Suspense fallback={null}>
+          <Routes>
+            {appRoutes.map(({ path, title, Component }) => (
+              <Route
+                key={path}
+                path={path}
+                element={<PageTitle title={title}><Component /></PageTitle>}
+              />
+            ))}
+            <Route path="*" element={<Navigate to={HOME_PATH} replace />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   );
